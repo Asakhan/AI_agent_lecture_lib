@@ -1,0 +1,10 @@
+tests/ 폴더에 기본적인 테스트를 작성해주세요.
+
+[테스트 파일: tests/test_conversation_manager.py]
+1. ConversationManager 초기화 테스트
+2. System Message 설정 테스트
+3. 메시지 추가 테스트
+4. 상태 판단 테스트
+
+pytest 또는 unittest 사용
+간단하지만 핵심 기능을 커버하도록 작성해주세요.

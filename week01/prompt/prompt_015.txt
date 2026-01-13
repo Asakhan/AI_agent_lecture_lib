@@ -1,0 +1,12 @@
+하드코딩된 값들을 설정 파일로 분리해주세요.
+
+[config/settings.py 생성]
+다음 설정들을 포함:
+- DEFAULT_MODEL = "gpt-4o-mini"
+- DEFAULT_TEMPERATURE = 0.7
+- MAX_TOKENS = 1000
+- MAX_RETRIES = 3
+- DATA_DIR = "data"
+- SAVE_FORMAT = "%Y%m%d_%H%M%S"
+
+ConversationManager와 main.py에서 이 설정들을 사용하도록 수정해주세요.

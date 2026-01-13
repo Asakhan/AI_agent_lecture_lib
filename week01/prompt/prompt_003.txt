@@ -1,0 +1,16 @@
+ConversationManager 클래스의 chat 메서드를 구현해주세요.
+
+[기능]
+1. 사용자 입력을 messages 리스트에 추가
+2. OpenAI API를 호출하여 응답 생성
+   - 모델: gpt-4o-mini
+   - temperature: 0.7
+   - 전체 messages 히스토리 전달
+3. AI 응답을 messages 리스트에 추가
+4. AI 응답 텍스트 반환
+
+[에러 처리]
+- API 호출 실패 시 적절한 예외 처리
+- 사용자에게 친화적인 에러 메시지
+
+코드에 주석을 달아서 각 단계를 설명해주세요.

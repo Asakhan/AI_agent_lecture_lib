@@ -1,0 +1,15 @@
+전체 코드의 타입 힌트와 문서화를 개선해주세요.
+
+[작업 내용]
+1. 모든 함수/메서드에 타입 힌트 추가
+2. docstring을 Google 스타일로 작성
+   - Args, Returns, Raises 섹션 포함
+3. 복잡한 로직에 설명 주석 추가
+4. 상수는 대문자로 (예: MAX_RETRIES)
+
+[파일]
+- src/conversation_manager.py
+- config/prompts.py
+- main.py
+
+일관성 있는 스타일을 유지해주세요.

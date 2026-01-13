@@ -1,0 +1,15 @@
+src/conversation_manager.py 파일에 ConversationManager 클래스를 생성해주세요.
+
+[요구사항]
+1. OpenAI API 클라이언트 초기화
+2. 환경변수에서 API 키 로드 (python-dotenv 사용)
+3. 대화 히스토리를 저장할 messages 리스트
+4. __init__ 메서드에서 system_message를 선택적으로 받기
+5. 적절한 docstring과 타입 힌트 추가
+
+[클래스 구조]
+- __init__(self, system_message: Optional[str] = None)
+- chat(self, user_input: str) -> str
+- get_messages(self) -> List[Dict]
+
+타입 힌트를 위해 필요한 import도 추가해주세요.

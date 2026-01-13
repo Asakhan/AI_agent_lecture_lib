@@ -1,0 +1,17 @@
+ConversationManager에 대화 저장 기능을 추가해주세요.
+
+[메서드]
+1. save_conversation(filename: Optional[str] = None) -> None
+   - filename이 None이면 타임스탬프로 자동 생성
+   - data/ 폴더에 JSON 형식으로 저장
+   - 저장 내용: timestamp, messages
+
+2. load_conversation(filename: str) -> None
+   - data/ 폴더에서 JSON 파일 로드
+   - messages 복원
+
+[필요한 import]
+- json
+- datetime
+
+에러 처리 포함하고, 저장/로드 성공 메시지 출력

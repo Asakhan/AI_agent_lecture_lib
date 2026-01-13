@@ -1,0 +1,18 @@
+main.py 파일에 기본 대화 루프를 구현해주세요.
+
+[요구사항]
+1. ConversationManager 임포트
+2. 환영 메시지 출력
+3. 무한 대화 루프:
+   - 사용자 입력 받기 (input)
+   - 'quit', 'exit', '종료' 입력 시 종료
+   - 빈 입력은 무시
+   - ConversationManager.chat() 호출
+   - AI 응답 출력
+4. 예외 처리 (KeyboardInterrupt, 일반 Exception)
+5. 깔끔한 종료 메시지
+
+[기본 System Message]
+"당신은 도움이 되는 AI 어시스턴트입니다."
+
+실행 예시를 주석으로 포함해주세요.
