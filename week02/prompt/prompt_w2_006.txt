@@ -1,0 +1,25 @@
+터미널에서 web_search.py 모듈을 테스트해주세요.
+
+[테스트 방법]
+파이썬 인터랙티브 셸에서:
+
+1. 모듈 import 테스트
+   from src.tools.web_search import tavily_search, SearchResult, format_search_result_for_llm, optimize_search_query
+
+2. 쿼리 최적화 테스트
+   optimize_search_query("최신 AI 트렌드에 대해 알려줘")
+   # 예상: "AI 트렌드 2024" 또는 "AI 트렌드 2025"
+
+3. 검색 테스트
+   result = tavily_search("AI agent trends 2024", max_results=3)
+   print(f"결과 수: {result.result_count}")
+   print(f"요약: {result.answer[:100] if result.answer else 'None'}...")
+
+4. 포맷팅 테스트
+   formatted = format_search_result_for_llm(result)
+   print(formatted[:500])
+
+[확인 사항]
+- ImportError 없이 모듈 로드되는지
+- 검색 결과가 정상적으로 반환되는지
+- 포맷팅된 문자열이 마크다운 형식인지

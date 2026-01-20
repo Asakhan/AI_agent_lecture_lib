@@ -1,0 +1,80 @@
+src/conversation_manager.py에 _handle_tool_calls 메서드를 추가해주세요.
+
+[메서드 시그니처]
+def _handle_tool_calls(self, message) -> str:
+
+[파라미터]
+- message: OpenAI API 응답의 choices[0].message 객체
+  - message.content: 텍스트 응답 (있을 수도 없을 수도 있음)
+  - message.tool_calls: 도구 호출 리스트
+
+[기능]
+
+1. Assistant 메시지 저장 (tool_calls 포함)
+   - OpenAI API 규격에 맞게 저장해야 함
+   
+   assistant_msg = {
+       "role": "assistant",
+       "content": message.content,  # None일 수 있음
+       "tool_calls": [
+           {
+               "id": tc.id,
+               "type": "function",
+               "function": {
+                   "name": tc.function.name,
+                   "arguments": tc.function.arguments
+               }
+           }
+           for tc in message.tool_calls
+       ]
+   }
+   self.messages.append(assistant_msg)
+
+2. 각 도구 호출 처리
+   for tool_call in message.tool_calls:
+       function_name = tool_call.function.name
+       arguments = json.loads(tool_call.function.arguments)
+       
+       logger.info(f"도구 실행: {function_name}({arguments})")
+       
+       # 도구 실행
+       result = self._execute_tool(function_name, arguments)
+       
+       # 결과를 메시지에 추가 (tool role)
+       self.messages.append({
+           "role": "tool",
+           "tool_call_id": tool_call.id,
+           "content": result
+       })
+
+3. 도구 결과 포함하여 API 재호출
+   final_response = self._call_api_with_tools()
+   final_content = final_response.choices[0].message.content
+
+4. 최종 응답 저장 및 반환
+   self.messages.append({
+       "role": "assistant",
+       "content": final_content
+   })
+   return final_content
+
+[docstring]
+"""
+LLM이 요청한 도구 호출을 처리합니다.
+
+1. Assistant의 도구 호출 요청을 메시지에 저장
+2. 각 도구를 실행하고 결과를 메시지에 추가
+3. 도구 결과를 포함하여 API를 다시 호출
+4. 최종 응답을 반환
+
+Args:
+    message: OpenAI API 응답의 message 객체 (tool_calls 포함)
+
+Returns:
+    str: 도구 결과를 반영한 최종 AI 응답
+"""
+
+[중요]
+- tool_call_id는 반드시 원본 ID를 그대로 사용해야 함
+- arguments는 JSON 문자열이므로 json.loads() 필요
+- role="tool"은 OpenAI API 규격

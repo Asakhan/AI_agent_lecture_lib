@@ -1,0 +1,43 @@
+src/tools/web_search.py에 tavily_search 함수를 추가해주세요.
+
+[함수 시그니처]
+def tavily_search(
+    query: str,
+    api_key: Optional[str] = None,
+    search_depth: str = "basic",
+    include_answer: bool = True,
+    include_raw_content: bool = False,
+    max_results: int = 5,
+    include_domains: Optional[List[str]] = None,
+    exclude_domains: Optional[List[str]] = None,
+) -> SearchResult:
+
+[기능]
+1. 입력 검증
+   - query가 비어있으면 ValueError
+   - query.strip() 처리
+   
+2. API 키 설정
+   - 파라미터 → 환경변수 순서로 확인
+   - 없으면 ValueError (친절한 메시지)
+
+3. max_results 범위 검증 (1-10)
+
+4. Tavily 클라이언트 생성 및 검색 실행
+   - 시간 측정 (time.time())
+   - search_params 딕셔너리로 파라미터 구성
+   - include_domains, exclude_domains는 있을 때만 추가
+
+5. 결과 파싱
+   - results에서 url 추출하여 sources 리스트 생성
+   - SearchResult 객체 생성 및 반환
+
+6. 로깅
+   - 검색 시작: 쿼리, depth, max_results
+   - 검색 완료: 결과 수, 소요 시간
+
+[에러 처리]
+- try-except로 감싸서 로깅 후 re-raise
+
+[docstring]
+Google 스타일로 Args, Returns, Raises, Example 포함

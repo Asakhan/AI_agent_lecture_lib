@@ -1,0 +1,50 @@
+src/tools/web_search.py에 다음 함수들을 추가해주세요.
+
+[함수 1: tavily_search_with_context]
+def tavily_search_with_context(
+    query: str,
+    context: Optional[str] = None,
+    api_key: Optional[str] = None,
+    max_results: int = 5,
+) -> SearchResult:
+
+- context가 있으면 쿼리 앞에 추가: f"{context} - {query}"
+- search_depth는 "advanced" 고정 (컨텍스트 검색은 심층)
+- 내부적으로 tavily_search 호출
+
+[함수 2: format_search_result_for_llm]
+def format_search_result_for_llm(search_result: SearchResult) -> str:
+
+- 검색 결과를 LLM 컨텍스트용 마크다운 문자열로 변환
+- 구조:
+  ## 웹 검색 결과: '{query}'
+  검색 시간: {time}초
+  
+  ### 📋 요약
+  {answer}  # has_answer일 때만
+  
+  ### 📰 상세 검색 결과
+  **[1] {title}**
+  - 출처: {url}
+  - 관련도: {score}
+  - 내용: {content}  # 300자 초과시 자르기
+  
+  ### 📚 참고 출처
+  1. {source1}
+  2. {source2}
+
+[함수 3: optimize_search_query]
+def optimize_search_query(user_input: str) -> str:
+
+- 사용자 입력을 검색에 최적화된 쿼리로 변환
+- 처리 내용:
+  1. strip() 처리
+  2. 불필요한 한국어 표현 제거 (config/settings.py의 QUERY_REMOVE_PHRASES 사용하거나 직접 정의)
+     - "알려줘", "설명해줘", "찾아줘", "검색해줘", "조사해줘"
+     - "뭐야", "무엇인가요", "에 대해", "관해서" 등
+  3. 시간 표현 처리 (TIME_INDICATOR_PHRASES)
+     - "최신", "요즘", "현재", "올해" 등이 있으면
+     - 해당 표현 제거 + 현재 연도 추가
+  4. 연속 공백 제거: " ".join(query.split())
+
+[각 함수에 docstring과 Example 포함]

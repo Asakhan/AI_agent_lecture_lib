@@ -1,0 +1,31 @@
+src/tools/web_search.py 파일을 생성하고, 먼저 기본 구조와 SearchResult 클래스를 작성해주세요.
+
+[파일 구조]
+1. 모듈 docstring
+2. Import 문
+   - os, time, logging
+   - typing (Optional, List, Dict, Any)
+   - dataclasses (dataclass, field)
+   - dotenv (load_dotenv)
+3. 로깅 설정
+4. 환경변수 로드
+5. TavilyClient lazy import 함수 (_get_tavily_client)
+
+[SearchResult 클래스]
+@dataclass로 구현하며 다음 필드 포함:
+- query: str - 검색 쿼리
+- answer: Optional[str] = None - AI 요약 답변
+- results: List[Dict[str, Any]] - 검색 결과 리스트 (default_factory=list)
+- sources: List[str] - 출처 URL 리스트 (default_factory=list)
+- search_time: float = 0.0 - 검색 소요 시간
+- raw_response: Optional[Dict[str, Any]] = None - 원본 응답
+
+[SearchResult 프로퍼티/메서드]
+- result_count (property): 결과 개수 반환
+- has_answer (property): answer 존재 여부
+- get_top_results(n: int = 3): 상위 n개 결과 반환
+- get_sources_as_string(separator: str = "\n"): 출처 문자열로 반환
+
+[_get_tavily_client 함수]
+- global 변수로 TavilyClient를 캐싱
+- ImportError 시 친절한 에러 메시지

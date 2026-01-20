@@ -1,0 +1,35 @@
+main.py의 main() 함수를 수정해주세요.
+
+[변경 사항]
+
+1. ConversationManager 초기화 부분 수정
+   try:
+       # 🆕 enable_search=True 명시
+       manager = ConversationManager(enable_search=True)
+       
+       # 🆕 검색 기능 상태 출력
+       if manager.is_search_enabled():
+           print("✅ 검색 기능이 활성화되었습니다.\n")
+       else:
+           print("⚠️ 검색 기능이 비활성화되었습니다. (API 키 확인 필요)\n")
+           
+   except Exception as e:
+       logger.error(f"초기화 실패: {e}")
+       print(f"❌ 초기화 실패: {e}")
+       print("환경 설정을 확인해주세요. (.env 파일)")
+       return
+
+2. 대화 루프에서 처리 중 메시지 추가 (선택사항)
+   # AI 응답 생성
+   print("\n🔄 처리 중...")  # 🆕 검색 시 시간이 걸릴 수 있으므로
+   response = manager.chat(user_input)
+   print(f"\nAI: {response}\n")
+
+3. 종료 메시지 수정
+   print()
+   print("=" * 60)
+   print("👋 대화를 종료합니다. 안녕히 가세요!")
+   print(f"   총 대화: {manager.get_message_count()}회")
+   print(f"   총 검색: {manager.get_search_count()}회")  # 🆕
+   print("=" * 60)
+   print()

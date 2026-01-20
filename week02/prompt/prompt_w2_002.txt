@@ -1,0 +1,11 @@
+src/tools/ 폴더를 생성하고 빈 __init__.py 파일을 만들어주세요.
+
+[생성할 구조]
+src/
+└── tools/
+    └── __init__.py
+
+[__init__.py 내용]
+- 모듈 설명 docstring만 포함
+- "도구(Tools) 모듈 패키지" 설명
+- 실제 import/export는 나중에 추가할 예정이라는 TODO 주석

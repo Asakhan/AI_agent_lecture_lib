@@ -1,0 +1,26 @@
+main.py의 print_welcome() 함수를 업데이트해주세요.
+
+[변경 내용]
+
+def print_welcome():
+    """환영 메시지를 출력합니다."""
+    print()
+    print("=" * 60)
+    print("🔍 AI 리서치 어시스턴트 v2.0")
+    print("   웹 검색 기능이 추가되었습니다!")
+    print("=" * 60)
+    print()
+    print("📌 사용 가능한 명령어:")
+    print("  • quit / exit / 종료  : 프로그램 종료")
+    print("  • save               : 대화 저장")
+    print("  • clear              : 대화 히스토리 초기화")
+    print("  • sources            : 마지막 검색 출처 보기")  # 🆕
+    print("  • status             : 현재 상태 확인")         # 🆕
+    print()
+    print("💡 검색 활용 팁:")                                 # 🆕
+    print("  • '~에 대해 조사해줘' → 웹 검색 실행")
+    print("  • '최신 ~ 알려줘' → 최신 정보 검색")
+    print("  • '~ 뉴스 찾아줘' → 관련 뉴스 검색")
+    print()
+    print("=" * 60)
+    print()

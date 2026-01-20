@@ -1,0 +1,41 @@
+src/search_agent.py 파일을 생성해주세요.
+
+[파일 목적]
+SearchAgent는 웹 검색 도구들을 오케스트레이션하는 상위 레벨 클래스입니다.
+src/tools/web_search.py의 함수들을 조합하여 사용합니다.
+
+[기본 구조]
+1. 모듈 docstring
+2. Import 문
+   - logging
+   - typing (Optional, List)
+   - src.tools.web_search에서 필요한 함수들 import:
+     - SearchResult
+     - tavily_search
+     - tavily_search_with_context
+     - format_search_result_for_llm
+     - optimize_search_query
+
+3. 로깅 설정
+
+4. SearchAgent 클래스
+   
+   [속성]
+   - max_results: int - 기본 검색 결과 수
+   - optimize_queries: bool - 쿼리 최적화 여부
+   - search_history: List[SearchResult] - 검색 히스토리
+   
+   [__init__ 메서드]
+   def __init__(
+       self,
+       max_results: int = 5,
+       optimize_queries: bool = True
+   ):
+   - max_results 범위 검증 (1-10)
+   - 속성 초기화
+   - 로깅
+   
+   [클래스 docstring]
+   - 클래스 설명
+   - Attributes 섹션
+   - Example 사용법

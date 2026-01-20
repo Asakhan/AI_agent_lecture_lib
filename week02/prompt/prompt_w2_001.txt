@@ -1,0 +1,20 @@
+config/settings.py 파일에 Tavily 검색 관련 설정을 추가해주세요.
+
+[추가할 설정]
+
+1. Tavily 검색 기본 설정
+   - TAVILY_DEFAULT_MAX_RESULTS = 5
+   - TAVILY_DEFAULT_SEARCH_DEPTH = "basic"
+   - TAVILY_ADVANCED_SEARCH_DEPTH = "advanced"
+
+2. 검색 쿼리 최적화용 상수
+   - QUERY_REMOVE_PHRASES: 검색 시 제거할 한국어 표현 리스트
+     예: "알려줘", "설명해줘", "찾아줘", "에 대해" 등
+   
+   - TIME_INDICATOR_PHRASES: 연도로 변환할 시간 표현 리스트
+     예: "최신", "요즘", "현재", "올해" 등
+
+[요구사항]
+- 기존 설정(OpenAI 관련)은 유지
+- 주석으로 섹션 구분 (# Tavily 검색 설정)
+- 각 설정에 설명 주석 추가

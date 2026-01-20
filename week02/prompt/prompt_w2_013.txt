@@ -1,0 +1,16 @@
+src/conversation_manager.py 파일 상단의 import 섹션을 수정해주세요.
+
+[추가할 import]
+
+1. 내부 모듈 import (기존 import 아래에 추가)
+   from src.search_agent import SearchAgent
+   from src.tools.tool_definitions import AVAILABLE_TOOLS
+
+2. 프롬프트 import 수정
+   기존: RESEARCH_ASSISTANT_SYSTEM_MESSAGE
+   변경: RESEARCH_ASSISTANT_SYSTEM_MESSAGE_V2 (또는 둘 다 import)
+
+[요구사항]
+- 기존 import는 유지
+- 내부 모듈 import는 별도 섹션으로 구분 (주석 추가)
+- try-except로 ImportError 처리 (Part 1 미완료 시 대비)

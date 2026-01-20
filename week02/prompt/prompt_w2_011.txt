@@ -1,0 +1,44 @@
+Part 1에서 작성한 코드 전체를 테스트해주세요.
+
+[테스트 시나리오]
+
+1. SearchAgent import 및 생성
+   from src.search_agent import SearchAgent
+   agent = SearchAgent()
+
+2. 기본 검색 테스트
+   result = agent.search("2024년 AI 에이전트 트렌드")
+   print(f"쿼리: {result.query}")
+   print(f"결과 수: {result.result_count}")
+   print(f"검색 시간: {result.search_time:.2f}초")
+   print(f"요약: {result.answer[:200] if result.answer else 'None'}...")
+
+3. 쿼리 최적화 확인
+   result2 = agent.search("최신 머신러닝에 대해 알려줘")
+   # 로그에서 쿼리 최적화 확인
+
+4. LLM 포맷 테스트
+   formatted = agent.format_for_llm(result)
+   print(formatted[:500])
+
+5. 출처 확인
+   print(f"출처: {agent.get_sources()}")
+
+6. 히스토리 확인
+   print(f"총 검색 횟수: {agent.get_search_count()}")
+
+7. 히스토리 초기화
+   agent.clear_history()
+   print(f"초기화 후 검색 횟수: {agent.get_search_count()}")
+
+[확인 사항]
+- 모든 import가 정상 동작하는지
+- 검색 결과가 올바르게 반환되는지
+- 쿼리 최적화가 동작하는지 (로그 확인)
+- format_for_llm이 마크다운 형식인지
+- 히스토리 관리가 정상인지
+
+[문제 발생 시]
+- ImportError: __init__.py의 export 확인
+- API 키 오류: .env 파일 확인
+- 모듈 경로 오류: 프로젝트 루트에서 실행 확인

@@ -1,0 +1,57 @@
+src/search_agent.py의 SearchAgent 클래스에 메서드들을 추가해주세요.
+
+[메서드 1: search]
+def search(
+    self,
+    query: str,
+    search_depth: str = "basic",
+    include_answer: bool = True,
+    max_results: Optional[int] = None,
+    optimize_query: Optional[bool] = None
+) -> SearchResult:
+
+- 입력 검증 (빈 쿼리 체크)
+- optimize_query 처리:
+  - None이면 self.optimize_queries 사용
+  - True면 optimize_search_query() 호출
+  - 원본과 다르면 로깅
+- tavily_search() 호출
+- 원본 쿼리를 result.query에 저장 (최적화된 쿼리 대신)
+- search_history에 추가
+- 결과 반환
+
+[메서드 2: search_with_context]
+def search_with_context(
+    self,
+    query: str,
+    context: str,
+    max_results: Optional[int] = None
+) -> SearchResult:
+
+- tavily_search_with_context() 호출
+- search_history에 추가
+- 결과 반환
+
+[메서드 3: format_for_llm]
+def format_for_llm(self, search_result: SearchResult) -> str:
+- format_search_result_for_llm() 호출하여 반환
+
+[메서드 4: get_sources]
+def get_sources(self) -> List[str]:
+- search_history가 비어있으면 빈 리스트
+- 마지막 검색 결과의 sources 반환
+
+[메서드 5: get_last_result]
+def get_last_result(self) -> Optional[SearchResult]:
+- 마지막 검색 결과 반환 (없으면 None)
+
+[메서드 6: get_search_count]
+def get_search_count(self) -> int:
+- search_history 길이 반환
+
+[메서드 7: clear_history]
+def clear_history(self) -> None:
+- search_history 초기화
+- 로깅
+
+[모든 메서드에 docstring 포함]

@@ -1,0 +1,23 @@
+conversation_manager 수정한 내용을 테스트해주세요.
+
+[테스트 코드]
+파이썬 인터랙티브 셸에서:
+
+from src.conversation_manager import ConversationManager
+
+# 검색 기능 활성화 테스트
+manager1 = ConversationManager(enable_search=True)
+print(f"검색 활성화: {manager1.enable_search}")
+print(f"SearchAgent: {manager1.search_agent is not None}")
+print(f"Tools: {manager1.tools is not None}")
+
+# 검색 기능 비활성화 테스트
+manager2 = ConversationManager(enable_search=False)
+print(f"검색 활성화: {manager2.enable_search}")
+print(f"SearchAgent: {manager2.search_agent is not None}")
+
+[확인 사항]
+- ImportError 없이 모듈 로드되는지
+- enable_search=True일 때 SearchAgent 생성되는지
+- enable_search=False일 때 SearchAgent가 None인지
+- 로그 메시지가 올바르게 출력되는지

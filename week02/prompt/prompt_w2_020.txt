@@ -1,0 +1,65 @@
+src/conversation_manager.py에 검색 관련 헬퍼 메서드들을 추가해주세요.
+
+[위치]
+기존 메서드들 (get_messages, get_message_count 등) 아래에 추가
+주석으로 "# 🆕 검색 관련 메서드 (2주차 추가)" 섹션 표시
+
+[메서드 1: get_last_search_sources]
+def get_last_search_sources(self) -> List[str]:
+    """
+    마지막 검색의 출처 목록을 반환합니다.
+    
+    Returns:
+        List[str]: 출처 URL 목록, 검색 기록 없으면 빈 리스트
+    """
+    if self.search_agent:
+        return self.search_agent.get_sources()
+    return []
+
+[메서드 2: get_search_count]
+def get_search_count(self) -> int:
+    """
+    총 검색 횟수를 반환합니다.
+    
+    Returns:
+        int: 검색 횟수
+    """
+    if self.search_agent:
+        return self.search_agent.get_search_count()
+    return 0
+
+[메서드 3: is_search_enabled]
+def is_search_enabled(self) -> bool:
+    """
+    검색 기능 활성화 여부를 반환합니다.
+    
+    Returns:
+        bool: 검색 기능 활성화 여부
+    """
+    return self.enable_search
+
+[추가로 수정할 메서드: clear_history]
+기존 clear_history 메서드에 검색 히스토리 초기화 추가:
+
+def clear_history(self) -> None:
+    """대화 히스토리를 초기화합니다."""
+    # 기존 코드...
+    
+    # 🆕 검색 히스토리도 초기화
+    if self.search_agent:
+        self.search_agent.clear_history()
+    
+    logger.info("대화 히스토리 초기화됨")
+
+[추가로 수정할 메서드: save_conversation]
+저장 데이터에 검색 관련 정보 추가:
+
+save_data = {
+    "timestamp": datetime.now().isoformat(),
+    "messages": self.messages,
+    "message_count": self.message_count,
+    "state": self.state,
+    # 🆕 검색 관련 정보 추가
+    "search_enabled": self.enable_search,
+    "search_count": self.get_search_count()
+}

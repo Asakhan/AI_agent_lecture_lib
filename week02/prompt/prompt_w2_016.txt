@@ -1,0 +1,40 @@
+src/conversation_manager.py에 _call_api_with_tools 메서드를 추가해주세요.
+
+[위치]
+chat() 메서드 위 또는 아래 (private 메서드 섹션)
+
+[메서드 시그니처]
+def _call_api_with_tools(self) -> Any:
+
+[기능]
+1. API 호출 파라미터 딕셔너리 구성
+   call_params = {
+       "model": DEFAULT_MODEL,
+       "messages": self.messages,
+       "temperature": DEFAULT_TEMPERATURE,
+   }
+
+2. 검색 기능 활성화 시 도구 추가
+   if self.enable_search and self.tools:
+       call_params["tools"] = self.tools
+       call_params["tool_choice"] = "auto"  # LLM이 자동 판단
+
+3. API 호출 및 응답 반환
+   response = self.client.chat.completions.create(**call_params)
+   return response
+
+[docstring]
+"""
+도구 정의를 포함하여 OpenAI API를 호출합니다.
+
+검색 기능이 활성화되어 있으면 tools 파라미터를 추가하여
+LLM이 필요시 도구를 호출할 수 있도록 합니다.
+
+Returns:
+    OpenAI API 응답 객체
+"""
+
+[참고]
+- tool_choice="auto": LLM이 도구 사용 여부를 자동 판단
+- tool_choice="required": 반드시 도구 사용
+- tool_choice="none": 도구 사용 안 함

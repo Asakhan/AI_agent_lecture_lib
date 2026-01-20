@@ -1,0 +1,66 @@
+src/tools/tool_definitions.py 파일을 생성해주세요.
+
+[파일 목적]
+OpenAI Function Calling에 사용할 도구 정의 JSON 스키마
+
+[내용]
+
+1. 모듈 docstring
+   - 파일 목적 설명
+   - description이 LLM 판단에 중요하다는 점 언급
+
+2. SEARCH_WEB_TOOL 딕셔너리
+   {
+       "type": "function",
+       "function": {
+           "name": "search_web",
+           "description": """웹에서 최신 정보를 검색합니다.
+           
+           이 도구를 사용해야 하는 경우:
+           - 실시간 정보 (주가, 날씨, 환율, 스포츠 결과 등)
+           - 최근 뉴스나 이벤트
+           - 특정 사실의 확인/검증
+           - "검색해줘", "찾아줘", "조사해줘" 등 명시적 요청
+           - 2024년 이후 정보
+           - 기업/인물/제품의 최신 현황
+           - 트렌드, 동향, 전망
+           
+           이 도구를 사용하지 않아야 하는 경우:
+           - 일반 개념/정의 설명
+           - 프로그래밍 문법, 코드 작성
+           - 수학 계산, 논리적 추론
+           - 개인적 조언, 의견
+           - 창작물 (시, 소설, 이메일 등)
+           - 번역
+           - 확정된 역사적 사실""",
+           "parameters": {
+               "type": "object",
+               "properties": {
+                   "query": {
+                       "type": "string",
+                       "description": "검색할 키워드나 질문. 구체적으로 작성. 예: 'Tesla stock 2024', 'AI agent trends'"
+                   },
+                   "search_depth": {
+                       "type": "string",
+                       "enum": ["basic", "advanced"],
+                       "description": "basic: 빠른 일반 검색, advanced: 심층 검색. 기본값 basic"
+                   }
+               },
+               "required": ["query"]
+           }
+       }
+   }
+
+3. AVAILABLE_TOOLS 리스트
+   - SEARCH_WEB_TOOL만 포함
+   
+4. TOOLS_BY_NAME 딕셔너리
+   - 이름으로 도구 찾기용
+   - {"search_web": SEARCH_WEB_TOOL}
+
+5. 헬퍼 함수들
+   - get_tool_by_name(name: str) -> dict
+   - get_all_tool_names() -> list
+
+[주석]
+- 향후 추가될 도구들 (FETCH_WEBPAGE_TOOL 등) 주석으로 예시
