@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>시퀀스 다이어그램 1: 시스템 초기화</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>시퀀스 다이어그램 1: 시스템 초기화 흐름</h2>
+    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Main
+    participant MM as MemoryManager
+    participant EG as EmbeddingGenerator
+    participant ChromaDB
+    participant SA as SearchAgent
+    participant CM as ConversationManager
+    participant OpenAI
+
+    User->>Main: python main.py 실행
+    
+    Note over Main: 시스템 초기화 시작
+    
+    Main->>MM: MemoryManager("research_memory", "data/chroma_db")
+    activate MM
+    MM->>MM: 폴더 생성 확인/생성
+    MM->>ChromaDB: PersistentClient(path) 생성
+    ChromaDB-->>MM: client 반환
+    MM->>ChromaDB: get_or_create_collection()
+    ChromaDB-->>MM: collection 반환
+    MM->>EG: EmbeddingGenerator() 초기화
+    activate EG
+    EG->>OpenAI: API 키 확인
+    OpenAI-->>EG: 검증 완료
+    EG-->>MM: embedding_generator 반환
+    deactivate EG
+    MM-->>Main: memory_manager 반환
+    deactivate MM
+    
+    Main->>SA: SearchAgent(memory_manager)
+    activate SA
+    SA->>SA: max_results, optimize_queries 설정
+    SA->>SA: memory_manager 저장
+    SA-->>Main: search_agent 반환
+    deactivate SA
+    
+    Main->>CM: ConversationManager(search_agent, memory_manager)
+    activate CM
+    CM->>CM: OpenAI client 초기화
+    CM->>CM: search_agent, memory_manager 저장
+    CM->>CM: conversation_history = []
+    CM-->>Main: conversation_manager 반환
+    deactivate CM
+    
+    Main->>User: 환영 메시지 출력
+    Note over User: 시스템 준비 완료!
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                width: 150,
+                height: 50
+            }
+        });
+    </script>
+</body>
+</html>

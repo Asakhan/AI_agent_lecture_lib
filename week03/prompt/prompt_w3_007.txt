@@ -1,0 +1,74 @@
+MemoryManager의 나머지 기본 메서드들을 구현해주세요.
+
+[1. get_all_documents 메서드]
+def get_all_documents(self) -> List[Dict[str, Any]]:
+    """모든 문서를 조회합니다."""
+    
+    results = self.collection.get()
+    
+    documents = []
+    for i in range(len(results['ids'])):
+        documents.append({
+            'id': results['ids'][i],
+            'text': results['documents'][i],
+            'metadata': results['metadatas'][i]
+        })
+    
+    return documents
+
+
+[2. delete_memory 메서드]
+def delete_memory(self, document_id: str) -> bool:
+    """특정 문서를 삭제합니다."""
+    
+    try:
+        self.collection.delete(ids=[document_id])
+        logger.info(f"문서 삭제 완료: {document_id}")
+        return True
+    except Exception as e:
+        logger.error(f"문서 삭제 실패: {e}")
+        return False
+
+
+[3. clear_all_memory 메서드]
+def clear_all_memory(self) -> int:
+    """모든 문서를 삭제합니다."""
+    
+    count = self.collection.count()
+    
+    # 컬렉션 삭제 후 재생성
+    self.client.delete_collection(name=self.collection_name)
+    self.collection = self.client.get_or_create_collection(
+        name=self.collection_name,
+        metadata={"hnsw:space": "cosine"}
+    )
+    
+    logger.info(f"전체 메모리 삭제: {count}개 문서")
+    return count
+
+
+[4. get_statistics 메서드]
+def get_statistics(self) -> Dict[str, Any]:
+    """메모리 통계를 반환합니다."""
+    
+    all_docs = self.get_all_documents()
+    
+    # 소스별 카운트
+    sources = {}
+    for doc in all_docs:
+        source = doc['metadata'].get('source', 'unknown')
+        sources[source] = sources.get(source, 0) + 1
+    
+    return {
+        'total_documents': len(all_docs),
+        'collection_name': self.collection_name,
+        'by_source': sources,
+        'persist_directory': self.persist_directory
+    }
+
+
+[테스트 코드 (주석)]
+# print(f"✓ 전체 문서: {len(mm.get_all_documents())}")
+# print(f"✓ 통계: {mm.get_statistics()}")
+# mm.delete_memory(doc_id)
+# print(f"✓ 삭제 후: {mm.collection.count()}개")

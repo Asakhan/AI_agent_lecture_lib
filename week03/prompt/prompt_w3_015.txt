@@ -1,0 +1,71 @@
+웹 검색 결과를 메모리에 저장하는 헬퍼 메서드를 구현해주세요.
+
+[메서드 구현]
+
+def _save_to_memory(
+    self, 
+    web_results: List[dict], 
+    query: str
+) -> int:
+    """
+    웹 검색 결과를 메모리에 저장
+    
+    Args:
+        web_results: Tavily 검색 결과 리스트
+        query: 원본 검색 쿼리
+    
+    Returns:
+        저장된 문서 수
+    """
+    if not self.memory_manager:
+        return 0
+    
+    saved_count = 0
+    
+    for result in web_results:
+        try:
+            # 텍스트 추출
+            text = result.get("content", "")
+            if not text:
+                continue
+            
+            # 메타데이터 구성
+            metadata = {
+                "source": "web_search",
+                "query": query,
+                "url": result.get("url", ""),
+                "title": result.get("title", ""),
+                "score": result.get("score", 0.0),
+                "saved_at": datetime.now().isoformat()
+            }
+            
+            # 메모리에 저장 (중복 체크 활성화)
+            doc_id = self.memory_manager.add_to_memory(
+                text=text,
+                metadata=metadata,
+                check_duplicate=True  # 중복 저장 방지
+            )
+            
+            saved_count += 1
+            logger.debug(f"Saved to memory: {doc_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save result: {e}")
+            continue
+    
+    logger.info(f"Saved {saved_count}/{len(web_results)} results to memory")
+    return saved_count
+
+
+[테스트 코드 (주석)]
+# # 웹 검색 후 저장 테스트
+# from src.tools.web_search import tavily_search
+# 
+# web_results = tavily_search("테슬라", max_results=5)
+# saved = agent._save_to_memory(web_results["results"], "테슬라")
+# 
+# print(f"저장됨: {saved}개")
+# 
+# # 메모리에서 다시 검색
+# memory_results = mm.search_memory("테슬라", top_k=5)
+# print(f"메모리에서 검색: {len(memory_results)}개")

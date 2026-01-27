@@ -1,0 +1,78 @@
+SearchAgent에 search_with_memory() 메서드를 추가해주세요.
+
+[메서드 시그니처]
+def search_with_memory(
+    self,
+    query: str,
+    use_memory: bool = True,
+    save_to_memory: bool = True,
+    memory_threshold: int = 3,
+    max_results: int = 5
+) -> Dict[str, Any]:
+    """
+    메모리를 활용한 지능형 검색
+    
+    Args:
+        query: 검색 쿼리
+        use_memory: 메모리 검색 사용 여부
+        save_to_memory: 웹 결과를 메모리에 저장할지 여부
+        memory_threshold: 웹 검색을 수행할 최소 메모리 결과 수
+        max_results: 최대 반환 결과 수
+    
+    Returns:
+        {
+            "query": str,
+            "memory_results": List[dict],
+            "web_results": List[dict],
+            "merged_results": List[dict],
+            "source_summary": dict
+        }
+    """
+
+
+[구현 로직 - Part 1: 초기화 및 메모리 검색]
+
+def search_with_memory(self, query: str, ...) -> Dict[str, Any]:
+    logger.info(f"Search with memory: {query}")
+    
+    # 결과 저장 구조
+    results = {
+        "query": query,
+        "memory_results": [],
+        "web_results": [],
+        "merged_results": [],
+        "source_summary": {
+            "from_memory": 0,
+            "from_web": 0,
+            "total": 0
+        }
+    }
+    
+    # [1단계] 메모리 검색
+    if use_memory and self.memory_manager:
+        try:
+            memory_results = self.memory_manager.search_memory(
+                query=query,
+                top_k=max_results
+            )
+            results["memory_results"] = memory_results
+            logger.info(f"Found {len(memory_results)} results in memory")
+        except Exception as e:
+            logger.error(f"Memory search failed: {e}")
+            memory_results = []
+    else:
+        memory_results = []
+    
+    # 계속... (다음 프롬프트에서)
+
+
+[테스트 코드 (주석)]
+# agent = SearchAgent(memory_manager=mm)
+# 
+# # 메모리만 검색
+# result = agent.search_with_memory(
+#     query="테슬라",
+#     use_memory=True,
+#     save_to_memory=False
+# )
+# print(f"메모리 결과: {len(result['memory_results'])}개")

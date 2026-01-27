@@ -1,0 +1,60 @@
+MemoryManager의 search_memory 메서드를 구현해주세요.
+
+[메서드 시그니처]
+def search_memory(
+    self, 
+    query: str, 
+    top_k: int = 5,
+    filter_dict: Optional[Dict] = None
+) -> List[Dict[str, Any]]:
+    """
+    쿼리와 유사한 문서를 검색합니다.
+    
+    Args:
+        query: 검색 쿼리
+        top_k: 반환할 최대 문서 수
+        filter_dict: 메타데이터 필터 (선택)
+    
+    Returns:
+        List[Dict]: 검색 결과 리스트
+            - text: 문서 텍스트
+            - metadata: 메타데이터
+            - similarity: 유사도 점수 (0-1)
+            - id: 문서 ID
+    """
+
+[구현 로직]
+
+1. 입력 검증
+if not query or not query.strip():
+    raise ValueError("검색 쿼리가 비어있습니다")
+
+2. 쿼리 임베딩 생성
+query_embedding = self.embeddings.create_embedding(query)
+
+3. Chroma DB 검색
+results = self.collection.query(
+    query_embeddings=[query_embedding],
+    n_results=top_k,
+    where=filter_dict  # 메타데이터 필터
+)
+
+4. 결과 포맷팅
+formatted_results = []
+for i in range(len(results['ids'][0])):
+    formatted_results.append({
+        'id': results['ids'][0][i],
+        'text': results['documents'][0][i],
+        'metadata': results['metadatas'][0][i],
+        'similarity': 1 - results['distances'][0][i]  # 거리 → 유사도
+    })
+
+5. 로깅 및 반환
+logger.info(f"검색 완료: {len(formatted_results)}개 결과")
+return formatted_results
+
+
+[테스트 코드 (주석)]
+# results = mm.search_memory("전기차", top_k=3)
+# for r in results:
+#     print(f"유사도: {r['similarity']:.2f} | {r['text'][:50]}...")

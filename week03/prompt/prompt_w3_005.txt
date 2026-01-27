@@ -1,0 +1,72 @@
+MemoryManager의 add_to_memory 메서드를 구현해주세요.
+
+[메서드 시그니처]
+def add_to_memory(
+    self, 
+    text: str, 
+    metadata: Optional[Dict[str, Any]] = None,
+    document_id: Optional[str] = None
+) -> str:
+    """
+    텍스트를 벡터 DB에 저장합니다.
+    
+    Args:
+        text: 저장할 텍스트
+        metadata: 추가 메타데이터 (선택)
+        document_id: 문서 ID (None이면 UUID 생성)
+    
+    Returns:
+        str: 저장된 문서 ID
+    
+    Raises:
+        ValueError: text가 비어있는 경우
+    """
+
+[구현 로직]
+
+1. 입력 검증
+if not text or not text.strip():
+    raise ValueError("텍스트가 비어있습니다")
+text = text.strip()
+
+2. document_id 생성 (없는 경우)
+if document_id is None:
+    document_id = str(uuid.uuid4())
+
+3. 임베딩 생성
+embedding = self.embeddings.create_embedding(text)
+
+4. 메타데이터 자동 추가
+if metadata is None:
+    metadata = {}
+metadata.update({
+    "timestamp": datetime.now().isoformat(),
+    "text_length": len(text),
+    "source": metadata.get("source", "user_input")
+})
+
+5. Chroma DB에 저장
+self.collection.add(
+    ids=[document_id],
+    documents=[text],
+    embeddings=[embedding],
+    metadatas=[metadata]
+)
+
+6. 로깅 및 반환
+logger.info(f"문서 저장 완료: {document_id}")
+return document_id
+
+
+[에러 처리]
+try-except로 전체를 감싸고:
+- ValueError: 입력 오류
+- Exception: API 오류 등
+
+
+[테스트 코드 (주석)]
+# doc_id = mm.add_to_memory(
+#     text="테슬라는 전기차 회사입니다",
+#     metadata={"source": "test", "category": "company"}
+# )
+# print(f"✓ 문서 저장: {doc_id}")

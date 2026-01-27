@@ -1,0 +1,103 @@
+ConversationManager에 대화 내용을 요약하여 메모리에 저장하는 메서드를 추가해주세요.
+
+[메서드 구현]
+
+def save_conversation_to_memory(
+    self, 
+    user_message: str, 
+    assistant_message: str
+) -> bool:
+    """
+    대화 내용을 요약하여 메모리에 저장
+    
+    Args:
+        user_message: 사용자 메시지
+        assistant_message: AI 응답
+    
+    Returns:
+        저장 성공 여부
+    """
+    if not self.memory_manager:
+        return False
+    
+    try:
+        # 대화 요약 생성 (간단한 버전)
+        conversation_summary = f"""
+사용자 질문: {user_message}
+
+AI 응답: {assistant_message[:300]}{"..." if len(assistant_message) > 300 else ""}
+        """.strip()
+        
+        # 메타데이터 구성
+        metadata = {
+            "source": "conversation",
+            "user_query": user_message,
+            "response_length": len(assistant_message),
+            "saved_from": "chat_history"
+        }
+        
+        # 메모리에 저장
+        self.memory_manager.add_to_memory(
+            text=conversation_summary,
+            metadata=metadata,
+            check_duplicate=True
+        )
+        
+        logger.info("Saved conversation to memory")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to save conversation: {e}")
+        return False
+
+
+[선택적 기능: GPT를 활용한 대화 요약]
+
+def _summarize_conversation_with_gpt(
+    self, 
+    user_message: str, 
+    assistant_message: str
+) -> str:
+    """GPT로 대화를 간결하게 요약 (선택적)"""
+    
+    try:
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "다음 대화를 한 문장으로 요약해주세요."
+                },
+                {
+                    "role": "user",
+                    "content": f"사용자: {user_message}\nAI: {assistant_message}"
+                }
+            ],
+            max_tokens=100
+        )
+        
+        summary = response.choices[0].message.content
+        return summary
+        
+    except Exception as e:
+        logger.error(f"GPT summarization failed: {e}")
+        # 실패 시 기본 요약 사용
+        return f"{user_message} - {assistant_message[:100]}..."
+
+
+[테스트 코드 (주석)]
+# conv_mgr = ConversationManager(agent, mm)
+# 
+# # 대화 저장
+# success = conv_mgr.save_conversation_to_memory(
+#     user_message="테슬라에 대해 알려줘",
+#     assistant_message="테슬라는 2003년 설립된..."
+# )
+# 
+# print(f"저장 성공: {success}")
+# 
+# # 메모리에서 검색
+# results = mm.search_memory("테슬라", top_k=3)
+# for r in results:
+#     if r['metadata'].get('source') == 'conversation':
+#         print(f"대화 내용: {r['text'][:50]}...")

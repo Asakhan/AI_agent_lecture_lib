@@ -1,0 +1,13 @@
+1. data 밑에 아래의 폴더를 생성해주세요.
+
+- chroma_db
+- conversations
+
+2. src 밑에 아래의 폴더를 생성해주세요.
+- src\utils
+
+3. src\utils 밑에 빈 __init__.py 파일을 만들어주세요.
+
+[__init__.py 내용]
+- 모듈 설명 docstring만 포함
+- 실제 import/export는 나중에 추가할 예정이라는 TODO 주석

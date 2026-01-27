@@ -1,0 +1,111 @@
+메모리와 웹 검색 결과를 병합하는 메서드를 구현해주세요.
+
+[메서드 구현]
+
+def _merge_results(
+    self,
+    memory_results: List[dict],
+    web_results: List[dict]
+) -> List[dict]:
+    """
+    메모리와 웹 결과를 하나로 병합
+    
+    Args:
+        memory_results: 메모리 검색 결과
+        web_results: 웹 검색 결과
+    
+    Returns:
+        병합된 결과 리스트 (출처 정보 포함)
+    """
+    merged = []
+    
+    # [1] 메모리 결과 추가
+    for r in memory_results:
+        merged.append({
+            "content": r["text"],
+            "source": "memory",
+            "similarity": r.get("similarity", 0.0),
+            "metadata": r.get("metadata", {}),
+            "provenance": {
+                "retrieved_from": "memory",
+                "original_source": r["metadata"].get("source", "unknown"),
+                "original_query": r["metadata"].get("query", ""),
+                "stored_at": r["metadata"].get("timestamp", ""),
+                "confidence": r.get("similarity", 0.0)
+            }
+        })
+    
+    # [2] 웹 결과 추가
+    for r in web_results:
+        merged.append({
+            "content": r.get("content", ""),
+            "source": "web",
+            "url": r.get("url", ""),
+            "title": r.get("title", ""),
+            "score": r.get("score", 0.0),
+            "provenance": {
+                "retrieved_from": "web",
+                "url": r.get("url", ""),
+                "fetched_at": datetime.now().isoformat(),
+                "tavily_score": r.get("score", 0.0)
+            }
+        })
+    
+    # [3] 중복 제거 (옵션)
+    merged = self._remove_duplicates(merged)
+    
+    # [4] 정렬 (유사도/점수 기준)
+    def sort_key(item):
+        if item["source"] == "memory":
+            return item.get("similarity", 0.0)
+        else:
+            return item.get("score", 0.0)
+    
+    merged = sorted(merged, key=sort_key, reverse=True)
+    
+    return merged
+
+
+def _remove_duplicates(
+    self, 
+    results: List[dict],
+    similarity_threshold: float = 0.95
+) -> List[dict]:
+    """중복 결과 제거"""
+    
+    if not results:
+        return []
+    
+    unique_results = []
+    seen_contents = []
+    
+    for result in results:
+        content = result["content"]
+        
+        # 매우 유사한 내용이 이미 있는지 확인
+        is_duplicate = False
+        for seen in seen_contents:
+            # 간단한 중복 체크 (문자열 포함 여부)
+            if content in seen or seen in content:
+                is_duplicate = True
+                break
+        
+        if not is_duplicate:
+            unique_results.append(result)
+            seen_contents.append(content)
+    
+    logger.info(f"Removed {len(results) - len(unique_results)} duplicates")
+    return unique_results
+
+
+[테스트 코드 (주석)]
+# # 병합 테스트
+# memory_res = mm.search_memory("테슬라", top_k=3)
+# web_res = tavily_search("테슬라", max_results=3)["results"]
+# 
+# merged = agent._merge_results(memory_res, web_res)
+# 
+# print(f"총 {len(merged)}개 결과:")
+# for i, r in enumerate(merged, 1):
+#     print(f"{i}. 출처: {r['source']} | {r['content'][:40]}...")
+#     print(f"   Provenance: {r['provenance']['retrieved_from']}")

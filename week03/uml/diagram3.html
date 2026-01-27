@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>시퀀스 다이어그램 3: 재검색 (메모리 활용)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>시퀀스 다이어그램 3: 재검색 처리 흐름 (메모리 활용)</h2>
+    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant CM as ConversationManager
+    participant OpenAI
+    participant SA as SearchAgent
+    participant MM as MemoryManager
+    participant EG as EmbeddingGenerator
+    participant ChromaDB
+
+    User->>CM: chat("테슬라에 대해 다시 알려줘")
+    activate CM
+    
+    Note over CM: 1단계: Function Calling 판단
+    CM->>OpenAI: chat.completions.create(tools=[web_search])
+    activate OpenAI
+    OpenAI-->>CM: tool_calls=[{name: web_search}]
+    deactivate OpenAI
+    
+    Note over CM: 2단계: 검색 수행 (메모리 우선)
+    CM->>SA: search_with_memory("테슬라")
+    activate SA
+    
+    Note over SA: 2-1: 메모리 검색
+    SA->>MM: search_memory("테슬라", top_k=5)
+    activate MM
+    MM->>EG: create_embedding("테슬라")
+    activate EG
+    EG->>EG: 캐시 확인 - HIT! ✓
+    Note over EG: 이전에 "테슬라" 검색했음
+    EG-->>MM: cached_embedding (즉시 반환)
+    deactivate EG
+    MM->>ChromaDB: collection.query(query_embeddings)
+    activate ChromaDB
+    Note over ChromaDB: HNSW 인덱스로 고속 검색
+    ChromaDB-->>MM: results (5개, 유사도 0.85~0.95)
+    deactivate ChromaDB
+    MM-->>SA: memory_results = 5개
+    deactivate MM
+    
+    Note over SA: 2-2: 메모리 충분 → 웹 검색 스킵
+    SA->>SA: len(memory_results) >= threshold (3)
+    SA->>SA: 웹 검색 건너뛰기 (빠름!)
+    
+    Note over SA: 2-3: 결과 병합 (메모리만)
+    SA->>SA: merge_results(memory_results, [])
+    SA-->>CM: search_results (from memory only)
+    deactivate SA
+    
+    Note over CM: 3단계: AI 응답 생성
+    CM->>OpenAI: chat.completions.create(messages + search_results)
+    activate OpenAI
+    OpenAI-->>CM: assistant_message
+    deactivate OpenAI
+    
+    Note over CM: 4단계: 대화 저장
+    CM->>MM: save_conversation_to_memory()
+    activate MM
+    MM->>EG: create_embedding()
+    EG-->>MM: embedding
+    MM->>ChromaDB: collection.add()
+    ChromaDB-->>MM: 저장 완료
+    MM-->>CM: True
+    deactivate MM
+    
+    CM-->>User: "이전에 말씀드린 것처럼..."
+    deactivate CM
+    
+    Note over User,CM: 속도 비교<br/>첫 검색: 2~5초<br/>재검색: 0.5~1초 (5~10배 빠름!)
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                width: 150,
+                height: 50
+            }
+        });
+    </script>
+</body>
+</html>

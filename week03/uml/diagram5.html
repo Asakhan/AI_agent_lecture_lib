@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>시퀀스 다이어그램 5: 일반 대화 처리</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>시퀀스 다이어그램 5: 일반 대화 처리 흐름</h2>
+    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant CM as ConversationManager
+    participant OpenAI
+    participant MM as MemoryManager
+
+    User->>CM: chat("안녕하세요")
+    activate CM
+    
+    Note over CM: 1단계: Function Calling 판단
+    CM->>CM: conversation_history에 추가
+    CM->>OpenAI: chat.completions.create(tools=[web_search])
+    activate OpenAI
+    Note over OpenAI: 검색 불필요 판단
+    OpenAI-->>CM: tool_calls = None (일반 응답)
+    deactivate OpenAI
+    
+    Note over CM: 2단계: 검색 스킵
+    CM->>CM: 검색 건너뛰기
+    
+    Note over CM: 3단계: 직접 응답
+    CM->>CM: assistant_message 추출
+    
+    Note over CM: 4단계: 대화 저장
+    CM->>MM: save_conversation_to_memory("안녕하세요", "안녕하세요! 무엇을...")
+    activate MM
+    MM->>MM: 대화 요약 생성
+    MM->>MM: create_embedding() + add_to_memory()
+    MM-->>CM: True
+    deactivate MM
+    
+    CM->>CM: conversation_history에 응답 추가
+    CM-->>User: "안녕하세요! 무엇을 도와드릴까요?"
+    deactivate CM
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                width: 150,
+                height: 50
+            }
+        });
+    </script>
+</body>
+</html>

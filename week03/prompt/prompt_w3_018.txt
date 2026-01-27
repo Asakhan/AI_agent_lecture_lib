@@ -1,0 +1,78 @@
+ConversationManager에 검색 결과를 메모리에 저장하는 메서드를 추가해주세요.
+
+[메서드 구현]
+
+def save_search_result_to_memory(
+    self, 
+    search_results: dict, 
+    user_query: str
+) -> int:
+    """
+    검색 결과를 메모리에 저장
+    
+    Args:
+        search_results: search_with_memory()의 반환값
+        user_query: 사용자 검색 쿼리
+    
+    Returns:
+        저장된 결과 수
+    """
+    if not self.memory_manager:
+        return 0
+    
+    saved_count = 0
+    
+    # 병합된 결과에서 상위 5개만 저장
+    merged_results = search_results.get("merged_results", [])
+    
+    for result in merged_results[:5]:
+        try:
+            # 이미 메모리에 있는 결과는 스킵
+            if result.get("source") == "memory":
+                continue
+            
+            # 메타데이터 구성
+            metadata = {
+                "source": "search_result",
+                "user_query": user_query,
+                "original_source": result.get("source", "unknown"),
+                "saved_from": "conversation"
+            }
+            
+            # URL이 있으면 추가
+            if "url" in result:
+                metadata["url"] = result["url"]
+            
+            # 메모리에 저장
+            self.memory_manager.add_to_memory(
+                text=result["content"],
+                metadata=metadata,
+                check_duplicate=True
+            )
+            
+            saved_count += 1
+            logger.debug(f"Saved search result to memory")
+            
+        except Exception as e:
+            logger.error(f"Failed to save search result: {e}")
+            continue
+    
+    if saved_count > 0:
+        logger.info(f"Saved {saved_count} search results to memory")
+    
+    return saved_count
+
+
+[테스트 코드 (주석)]
+# # 검색 수행
+# agent = SearchAgent(memory_manager=mm)
+# search_results = agent.search_with_memory("테슬라")
+# 
+# # ConversationManager로 저장
+# conv_mgr = ConversationManager(agent, mm)
+# saved = conv_mgr.save_search_result_to_memory(
+#     search_results, 
+#     "테슬라"
+# )
+# 
+# print(f"저장된 결과: {saved}개")

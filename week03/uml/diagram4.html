@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>시퀀스 다이어그램 4: 메모리 명령어 처리</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>시퀀스 다이어그램 4: 메모리 명령어 처리 흐름</h2>
+    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant Main
+    participant MM as MemoryManager
+    participant ChromaDB
+
+    rect rgb(240, 248, 255)
+        Note over User,ChromaDB: 명령어 1: /memory (통계 보기)
+        
+        User->>Main: 입력: "memory"
+        Main->>MM: print_memory_dashboard()
+        activate MM
+        
+        MM->>MM: get_memory_stats()
+        MM->>ChromaDB: collection.get() - 전체 문서 조회
+        activate ChromaDB
+        ChromaDB-->>MM: all_documents
+        deactivate ChromaDB
+        
+        MM->>MM: 통계 계산<br/>- 소스별 카운트<br/>- 날짜별 카운트<br/>- 평균 텍스트 길이
+        MM->>MM: 대시보드 포맷팅
+        MM->>User: 대시보드 출력<br/>━━━━━━━━━━━━━━<br/>📊 메모리 시스템<br/>총 문서: 15개<br/>소스별 분포...<br/>━━━━━━━━━━━━━━
+        deactivate MM
+    end
+    
+    rect rgb(255, 248, 240)
+        Note over User,ChromaDB: 명령어 2: /memory-search (직접 검색)
+        
+        User->>Main: 입력: "memory-search 전기차"
+        Main->>MM: search_memory("전기차", top_k=5)
+        activate MM
+        
+        MM->>MM: create_embedding("전기차")
+        MM->>ChromaDB: collection.query()
+        activate ChromaDB
+        ChromaDB-->>MM: results (5개)
+        deactivate ChromaDB
+        
+        MM->>MM: format_results()<br/>- 유사도 계산<br/>- 출처 정보 추가
+        MM-->>Main: formatted_results
+        deactivate MM
+        
+        Main->>User: 검색 결과 출력<br/>━━━━━━━━━━━━━━<br/>🔍 5개 결과<br/>1. [유사도: 0.92]<br/>   텍스트...<br/>━━━━━━━━━━━━━━
+    end
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                width: 150,
+                height: 50
+            }
+        });
+    </script>
+</body>
+</html>

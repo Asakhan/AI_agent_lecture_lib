@@ -1,0 +1,200 @@
+오래된 메모리 정리 기능과 대시보드 출력 기능을 추가해주세요.
+
+[1. cleanup_old_memories 메서드]
+def cleanup_old_memories(
+    self, 
+    days_old: int = 30,
+    keep_important: bool = True
+) -> Dict[str, int]:
+    """
+    오래된 메모리를 정리합니다.
+    
+    Args:
+        days_old: 이 일수보다 오래된 문서 삭제
+        keep_important: 중요 문서 보존 여부
+    
+    Returns:
+        {"deleted": int, "kept": int}
+    """
+    
+    from datetime import datetime, timedelta
+    
+    # 기준 날짜 계산
+    cutoff_date = (datetime.now() - timedelta(days=days_old)).isoformat()
+    
+    # 전체 문서 조회
+    all_docs = self.get_all_documents()
+    
+    deleted = 0
+    kept = 0
+    
+    for doc in all_docs:
+        timestamp = doc['metadata'].get('timestamp', '')
+        
+        # 오래된 문서인지 확인
+        if timestamp < cutoff_date:
+            # 중요 문서 체크
+            if keep_important and doc['metadata'].get('important', False):
+                kept += 1
+                continue
+            
+            # 삭제
+            if self.delete_memory(doc['id']):
+                deleted += 1
+        else:
+            kept += 1
+    
+    logger.info(f"메모리 정리 완료: {deleted}개 삭제, {kept}개 보존")
+    
+    return {
+        "deleted": deleted,
+        "kept": kept,
+        "cutoff_date": cutoff_date
+    }
+
+
+[2. mark_as_important 메서드]
+def mark_as_important(self, document_id: str) -> bool:
+    """문서를 중요로 표시합니다."""
+    
+    try:
+        # 문서 조회
+        doc = self.collection.get(ids=[document_id])
+        
+        if not doc['ids']:
+            return False
+        
+        # 메타데이터 업데이트
+        metadata = doc['metadatas'][0]
+        metadata['important'] = True
+        
+        # 문서 업데이트 (삭제 후 재생성)
+        self.collection.delete(ids=[document_id])
+        self.collection.add(
+            ids=[document_id],
+            documents=[doc['documents'][0]],
+            metadatas=[metadata]
+        )
+        
+        logger.info(f"중요 문서 표시: {document_id}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"중요 표시 실패: {e}")
+        return False
+
+
+[3. get_memory_stats 메서드]
+def get_memory_stats(self) -> Dict[str, Any]:
+    """상세한 메모리 통계를 반환합니다."""
+    
+    all_docs = self.get_all_documents()
+    
+    # 소스별 카운트
+    sources = {}
+    for doc in all_docs:
+        source = doc['metadata'].get('source', 'unknown')
+        sources[source] = sources.get(source, 0) + 1
+    
+    # 날짜별 카운트
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    
+    date_counts = {
+        'last_24h': 0,
+        'last_7days': 0,
+        'last_30days': 0,
+        'older': 0
+    }
+    
+    for doc in all_docs:
+        timestamp_str = doc['metadata'].get('timestamp', '')
+        if timestamp_str:
+            timestamp = datetime.fromisoformat(timestamp_str)
+            age = (now - timestamp).days
+            
+            if age < 1:
+                date_counts['last_24h'] += 1
+            if age < 7:
+                date_counts['last_7days'] += 1
+            if age < 30:
+                date_counts['last_30days'] += 1
+            else:
+                date_counts['older'] += 1
+    
+    # 텍스트 길이 통계
+    text_lengths = [len(doc['text']) for doc in all_docs]
+    avg_length = sum(text_lengths) / len(text_lengths) if text_lengths else 0
+    
+    return {
+        'total_documents': len(all_docs),
+        'collection_name': self.collection_name,
+        'by_source': sources,
+        'by_date': date_counts,
+        'avg_text_length': int(avg_length),
+        'embedding_dimension': self.embeddings.get_dimension(),
+        'cache_info': self.embeddings.get_cache_info()
+    }
+
+
+[4. print_memory_dashboard 메서드]
+def print_memory_dashboard(self):
+    """메모리 통계를 대시보드 형태로 출력합니다."""
+    
+    stats = self.get_memory_stats()
+    
+    print("=" * 60)
+    print("📊 메모리 시스템 대시보드")
+    print("=" * 60)
+    print(f"컬렉션: {stats['collection_name']}")
+    print(f"총 문서 수: {stats['total_documents']:,}개")
+    print(f"평균 텍스트 길이: {stats['avg_text_length']:,}자")
+    print(f"임베딩 차원: {stats['embedding_dimension']}")
+    print()
+    print("📁 소스별 분포:")
+    for source, count in stats['by_source'].items():
+        print(f"  • {source}: {count}개")
+    print()
+    print("📅 기간별 분포:")
+    print(f"  • 최근 24시간: {stats['by_date']['last_24h']}개")
+    print(f"  • 최근 7일: {stats['by_date']['last_7days']}개")
+    print(f"  • 최근 30일: {stats['by_date']['last_30days']}개")
+    print(f"  • 그 이전: {stats['by_date']['older']}개")
+    print()
+    print("💾 캐시 정보:")
+    cache_info = stats['cache_info']
+    print(f"  • 캐시 크기: {cache_info.get('size', 0)}개")
+    print(f"  • 적중률: {cache_info.get('hit_rate', 0):.1%}")
+    print("=" * 60)
+
+
+[5. EmbeddingGenerator에 get_cache_info 추가]
+src/utils/embeddings.py의 EmbeddingGenerator 클래스에:
+
+def get_cache_info(self) -> Dict[str, Any]:
+    """캐시 통계를 반환합니다."""
+    return {
+        'size': len(self.cache),
+        'hit_rate': self.cache_hits / max(self.total_requests, 1) if hasattr(self, 'cache_hits') else 0
+    }
+
+__init__에 카운터 추가:
+self.cache_hits = 0
+self.total_requests = 0
+
+create_embedding 메서드에서:
+self.total_requests += 1
+if text in self.cache:
+    self.cache_hits += 1
+
+
+[테스트 코드 (주석)]
+# # 중요 문서 표시
+# mm.mark_as_important(doc_id)
+# 
+# # 30일 이상 오래된 문서 정리
+# result = mm.cleanup_old_memories(days_old=30)
+# print(f"✓ 삭제: {result['deleted']}개, 보존: {result['kept']}개")
+#
+# # 대시보드 출력
+# mm.print_memory_dashboard()

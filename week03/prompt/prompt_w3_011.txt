@@ -1,0 +1,150 @@
+tests/test_memory_manager.py 파일을 생성하고
+MemoryManager의 주요 기능에 대한 단위 테스트를 작성해주세요.
+
+[테스트 파일 구조]
+import unittest
+import os
+import shutil
+import logging
+import sys
+import json
+from pathlib import Path
+from src.memory_manager import MemoryManager
+from src.utils.embeddings import EmbeddingGenerator
+
+class TestMemoryManager(unittest.TestCase):
+    """MemoryManager 단위 테스트"""
+    
+    @classmethod
+    def setUpClass(cls):
+        """테스트 시작 전 한 번 실행"""
+        cls.test_dir = "data/test_chroma_db"
+        cls.mm = MemoryManager("test_collection", cls.test_dir)
+    
+    @classmethod
+    def tearDownClass(cls):
+        """테스트 종료 후 정리"""
+        if os.path.exists(cls.test_dir):
+            shutil.rmtree(cls.test_dir)
+    
+    def setUp(self):
+        """각 테스트 전 실행"""
+        # 기존 데이터 정리
+        self.mm.clear_all_memory()
+    
+    # 테스트 메서드들...
+
+
+[1. 초기화 테스트]
+def test_initialization(self):
+    """MemoryManager 초기화 테스트"""
+    self.assertIsNotNone(self.mm.client)
+    self.assertIsNotNone(self.mm.collection)
+    self.assertIsNotNone(self.mm.embeddings)
+    self.assertEqual(self.mm.collection_name, "test_collection")
+
+
+[2. 문서 저장 테스트]
+def test_add_to_memory(self):
+    """문서 저장 기능 테스트"""
+    text = "테슬라는 전기차 회사입니다"
+    doc_id = self.mm.add_to_memory(text)
+    
+    self.assertIsNotNone(doc_id)
+    self.assertEqual(self.mm.collection.count(), 1)
+    
+    # 빈 텍스트는 예외 발생
+    with self.assertRaises(ValueError):
+        self.mm.add_to_memory("")
+
+
+[3. 검색 테스트]
+def test_search_memory(self):
+    """검색 기능 테스트"""
+    # 문서 저장
+    self.mm.add_to_memory("테슬라는 전기차 회사입니다")
+    self.mm.add_to_memory("애플은 아이폰을 만듭니다")
+    
+    # 검색
+    results = self.mm.search_memory("전기차", top_k=2)
+    
+    self.assertGreater(len(results), 0)
+    self.assertIn('text', results[0])
+    self.assertIn('similarity', results[0])
+    self.assertGreater(results[0]['similarity'], 0.5)
+
+
+[4. 중복 체크 테스트]
+def test_duplicate_check(self):
+    """중복 문서 체크 테스트"""
+    text = "테슬라는 전기차 회사입니다"
+    
+    doc_id1 = self.mm.add_to_memory(text)
+    doc_id2 = self.mm.add_to_memory(text)  # 중복
+    
+    # 동일한 ID 반환되어야 함
+    self.assertEqual(doc_id1, doc_id2)
+    self.assertEqual(self.mm.collection.count(), 1)
+
+
+[5. 삭제 테스트]
+def test_delete_memory(self):
+    """문서 삭제 기능 테스트"""
+    doc_id = self.mm.add_to_memory("삭제할 문서")
+    
+    # 삭제 전
+    self.assertEqual(self.mm.collection.count(), 1)
+    
+    # 삭제
+    result = self.mm.delete_memory(doc_id)
+    self.assertTrue(result)
+    
+    # 삭제 후
+    self.assertEqual(self.mm.collection.count(), 0)
+
+
+[6. 메타데이터 필터링 테스트]
+def test_metadata_filtering(self):
+    """메타데이터 필터링 테스트"""
+    self.mm.add_to_memory("문서1", metadata={"source": "web"})
+    self.mm.add_to_memory("문서2", metadata={"source": "user"})
+    
+    # 소스별 검색
+    web_results = self.mm.search_memory_by_source("문서", "web")
+    
+    self.assertEqual(len(web_results), 1)
+    self.assertEqual(web_results[0]['metadata']['source'], "web")
+
+
+[7. 통계 테스트]
+def test_statistics(self):
+    """통계 기능 테스트"""
+    # 여러 문서 추가
+    for i in range(5):
+        self.mm.add_to_memory(f"테스트 문서 {i}")
+    
+    stats = self.mm.get_statistics()
+    
+    self.assertEqual(stats['total_documents'], 5)
+    self.assertIn('by_source', stats)
+    self.assertGreater(stats['avg_text_length'], 0)
+
+
+[실행 코드]
+if __name__ == '__main__':
+    # 로깅 설정
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    
+    # 테스트 실행
+    unittest.main(verbosity=2)
+
+
+[실행 방법]
+터미널에서:
+python tests/test_memory_manager.py
+
+또는:
+python -m unittest tests.test_memory_manager

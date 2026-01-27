@@ -1,0 +1,40 @@
+src/utils/embeddings.py 파일을 생성하고 다음 기능을 구현해주세요.
+
+[클래스 구조]
+class EmbeddingGenerator:
+    def __init__(self):
+        - OpenAI 클라이언트 초기화
+        - 모델: "text-embedding-3-small"
+        - 캐시 딕셔너리 초기화
+        - 임베딩 생성 카운터 초기화
+    
+    def create_embedding(self, text: str) -> List[float]:
+        - 단일 텍스트를 1536차원 벡터로 변환
+        - 캐시 확인 (있으면 캐시 반환)
+        - OpenAI API 호출
+        - 결과 캐싱 및 반환
+    
+    def create_embeddings(self, texts: List[str]) -> List[List[float]]:
+        - 여러 텍스트를 배치로 처리
+        - 효율적인 API 호출
+    
+    def get_dimension(self) -> int:
+        - 임베딩 차원 수 반환 (1536)
+    
+    def get_cache_info(self) -> dict:
+        - 캐시 통계 반환
+
+[요구사항]
+- 에러 처리: try-except로 API 오류 처리
+- 재시도 로직: 최대 3회 재시도 (지수 백오프)
+- 로깅: INFO 레벨로 주요 작업 기록
+- 타입 힌팅: 모든 메서드에 타입 명시
+- Docstring: 구글 스타일 문서화
+
+[Import]
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+from typing import List, Dict, Optional, Any
+import logging
+import time

@@ -1,0 +1,67 @@
+메타데이터 기반 필터링 기능을 강화해주세요.
+
+[search_memory_by_source 메서드 추가]
+def search_memory_by_source(
+    self, 
+    query: str, 
+    source: str, 
+    top_k: int = 5
+) -> List[Dict[str, Any]]:
+    """특정 소스에서만 검색합니다."""
+    
+    filter_dict = {"source": source}
+    return self.search_memory(query, top_k, filter_dict)
+
+
+[search_memory_by_date_range 메서드 추가]
+def search_memory_by_date_range(
+    self, 
+    query: str,
+    start_date: str,  # ISO format
+    end_date: str,    # ISO format
+    top_k: int = 5
+) -> List[Dict[str, Any]]:
+    """날짜 범위 내에서 검색합니다."""
+    
+    # Chroma의 where 필터 사용
+    filter_dict = {
+        "$and": [
+            {"timestamp": {"$gte": start_date}},
+            {"timestamp": {"$lte": end_date}}
+        ]
+    }
+    
+    return self.search_memory(query, top_k, filter_dict)
+
+
+[get_documents_by_metadata 메서드 추가]
+def get_documents_by_metadata(
+    self, 
+    key: str, 
+    value: Any
+) -> List[Dict[str, Any]]:
+    """특정 메타데이터 값으로 문서를 조회합니다."""
+    
+    results = self.collection.get(
+        where={key: value}
+    )
+    
+    documents = []
+    for i in range(len(results['ids'])):
+        documents.append({
+            'id': results['ids'][i],
+            'text': results['documents'][i],
+            'metadata': results['metadatas'][i]
+        })
+    
+    return documents
+
+
+[테스트 코드 (주석)]
+# # 소스별 검색
+# web_results = mm.search_memory_by_source("테슬라", "web_search")
+# print(f"✓ 웹 검색 결과: {len(web_results)}개")
+# 
+# # 메타데이터 조회
+# docs = mm.get_documents_by_metadata("category", "company")
+# print(f"✓ 회사 카테고리: {len(docs)}개")

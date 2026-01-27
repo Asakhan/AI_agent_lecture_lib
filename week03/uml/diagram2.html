@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>시퀀스 다이어그램 2: 첫 검색 처리</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h2>시퀀스 다이어그램 2: 첫 검색 처리 흐름 (웹 검색)</h2>
+    <div class="mermaid">
+sequenceDiagram
+    participant User
+    participant CM as ConversationManager
+    participant OpenAI
+    participant SA as SearchAgent
+    participant MM as MemoryManager
+    participant EG as EmbeddingGenerator
+    participant Tavily
+    participant ChromaDB
+
+    User->>CM: chat("테슬라 전기차에 대해 알려줘")
+    activate CM
+    
+    Note over CM: 1단계: Function Calling 판단
+    CM->>CM: conversation_history에 추가
+    CM->>OpenAI: chat.completions.create(tools=[web_search])
+    activate OpenAI
+    OpenAI-->>CM: tool_calls=[{name: web_search}]
+    deactivate OpenAI
+    
+    Note over CM: 2단계: 검색 수행 (메모리 활용)
+    CM->>SA: search_with_memory("테슬라 전기차")
+    activate SA
+    
+    Note over SA: 2-1: 메모리 검색 시도
+    SA->>MM: search_memory("테슬라 전기차", top_k=5)
+    activate MM
+    MM->>EG: create_embedding("테슬라 전기차")
+    activate EG
+    EG->>EG: 캐시 확인
+    EG->>OpenAI: embeddings.create()
+    OpenAI-->>EG: [0.023, -0.056, ..., 0.045]
+    EG-->>MM: query_embedding
+    deactivate EG
+    MM->>ChromaDB: collection.query(query_embeddings)
+    ChromaDB-->>MM: results (0개 - 메모리 비어있음)
+    MM-->>SA: memory_results = []
+    deactivate MM
+    
+    Note over SA: 2-2: 메모리 부족 → 웹 검색
+    SA->>SA: len(memory_results) < threshold (3)
+    SA->>Tavily: tavily_search("테슬라 전기차")
+    activate Tavily
+    Tavily-->>SA: web_results (5개)
+    deactivate Tavily
+    
+    Note over SA: 2-3: 웹 결과 메모리 저장
+    loop 각 웹 결과
+        SA->>MM: add_to_memory(result, metadata)
+        activate MM
+        MM->>EG: create_embedding(result.text)
+        activate EG
+        EG->>OpenAI: embeddings.create()
+        OpenAI-->>EG: embedding
+        EG-->>MM: embedding
+        deactivate EG
+        MM->>MM: check_duplicate()
+        MM->>ChromaDB: collection.add(...)
+        ChromaDB-->>MM: 저장 완료
+        MM-->>SA: document_id
+        deactivate MM
+    end
+    
+    Note over SA: 2-4: 결과 병합
+    SA->>SA: merge_results(memory_results, web_results)
+    SA-->>CM: search_results (merged)
+    deactivate SA
+    
+    Note over CM: 3단계: AI 응답 생성
+    CM->>CM: conversation_history에 tool_call 결과 추가
+    CM->>OpenAI: chat.completions.create(messages + search_results)
+    activate OpenAI
+    OpenAI-->>CM: assistant_message
+    deactivate OpenAI
+    
+    Note over CM: 4단계: 대화 내용 메모리 저장
+    CM->>MM: save_conversation_to_memory(user_msg, ai_msg)
+    activate MM
+    MM->>MM: 대화 요약 생성
+    MM->>EG: create_embedding(conversation_summary)
+    activate EG
+    EG->>OpenAI: embeddings.create()
+    OpenAI-->>EG: embedding
+    EG-->>MM: embedding
+    deactivate EG
+    MM->>ChromaDB: collection.add() - 대화 저장
+    ChromaDB-->>MM: 저장 완료
+    MM-->>CM: True
+    deactivate MM
+    
+    CM->>CM: conversation_history에 응답 추가
+    CM-->>User: "테슬라는 2003년 설립된..."
+    deactivate CM
+    </div>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            sequence: {
+                width: 150,
+                height: 50
+            }
+        });
+    </script>
+</body>
+</html>

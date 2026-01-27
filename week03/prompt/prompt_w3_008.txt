@@ -1,0 +1,68 @@
+MemoryManager에 중복 문서 확인 및 제거 기능을 추가해주세요.
+
+[새 메서드: check_duplicate]
+def check_duplicate(
+    self, 
+    text: str, 
+    threshold: float = 0.95
+) -> Optional[Dict[str, Any]]:
+    """
+    중복 문서를 확인합니다.
+    
+    Args:
+        text: 확인할 텍스트
+        threshold: 중복 판단 임계값 (0-1)
+    
+    Returns:
+        중복 문서 정보 또는 None
+    """
+    
+    # 유사 문서 검색
+    results = self.search_memory(text, top_k=1)
+    
+    if not results:
+        return None
+    
+    # 가장 유사한 문서 확인
+    most_similar = results[0]
+    
+    if most_similar['similarity'] >= threshold:
+        logger.info(f"중복 문서 발견: {most_similar['id']} (유사도: {most_similar['similarity']:.3f})")
+        return most_similar
+    
+    return None
+
+
+[add_to_memory 메서드 수정]
+기존 add_to_memory 메서드에 중복 체크 추가:
+
+def add_to_memory(
+    self, 
+    text: str, 
+    metadata: Optional[Dict[str, Any]] = None,
+    document_id: Optional[str] = None,
+    check_duplicate: bool = True  # NEW 파라미터
+) -> str:
+    
+    # 입력 검증
+    if not text or not text.strip():
+        raise ValueError("텍스트가 비어있습니다")
+    
+    # 중복 체크 (check_duplicate=True인 경우)
+    if check_duplicate:
+        duplicate = self.check_duplicate(text)
+        if duplicate:
+            logger.warning(f"중복 문서로 저장 스킵: {duplicate['id']}")
+            return duplicate['id']  # 기존 문서 ID 반환
+    
+    # 기존 로직 계속...
+
+
+[테스트 코드 (주석)]
+# # 첫 번째 저장
+# id1 = mm.add_to_memory("테슬라는 전기차 회사입니다")
+# print(f"✓ 문서 저장: {id1}")
+# 
+# # 중복 저장 시도
+# id2 = mm.add_to_memory("테슬라는 전기차 회사입니다")
+# print(f"✓ 중복 체크: {id1 == id2}")  # True여야 함

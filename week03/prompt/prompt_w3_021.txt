@@ -1,0 +1,123 @@
+main.py를 수정하여 전체 시스템을 통합해주세요.
+
+[수정 사항]
+
+1. MemoryManager 초기화 추가
+
+파일 상단 import 부분에:
+from src.memory_manager import MemoryManager
+
+
+main() 함수 초반부에:
+
+def main():
+    print("AI Research Assistant Starting...")
+    
+    # MemoryManager 초기화 (NEW)
+    print("Initializing Memory System...")
+    memory_manager = MemoryManager(
+        collection_name="research_assistant_memory",
+        persist_directory="data/chroma_db"
+    )
+    print(f"✓ Memory System Ready ({memory_manager.collection.count()} documents)")
+    
+    # SearchAgent 초기화 (메모리 연결)
+    search_agent = SearchAgent(memory_manager=memory_manager)  # 수정
+    
+    # ConversationManager 초기화 (메모리 연결)
+    conversation_manager = ConversationManager(
+        search_agent=search_agent,
+        memory_manager=memory_manager  # 추가
+    )
+    
+    # ... (기존 코드 계속)
+
+
+2. 새 명령어 추가
+
+기존 명령어 처리 부분에 추가:
+
+while True:
+    user_input = input("\n당신: ").strip()
+    
+    if not user_input:
+        continue
+    
+    # 기존 명령어
+    if user_input.lower() in ['exit', 'quit', '종료']:
+        ...
+    elif user_input.lower() in ['history', '대화기록']:
+        ...
+    elif user_input.lower() in ['clear', '초기화']:
+        ...
+    elif user_input.lower() in ['save', '저장']:
+        ...
+    
+    # ========== NEW: 메모리 명령어 ==========
+    
+    elif user_input.lower() in ['memory', '메모리']:
+        # 메모리 통계 출력
+        memory_manager.print_memory_dashboard()
+        continue
+    
+    elif user_input.lower().startswith('memory-search '):
+        # 메모리 직접 검색
+        query = user_input[14:].strip()  # "memory-search " 이후 텍스트
+        
+        if not query:
+            print("사용법: memory-search <검색어>")
+            continue
+        
+        print(f"\n🔍 메모리 검색: {query}")
+        results = memory_manager.search_memory(query, top_k=5)
+        
+        if not results:
+            print("검색 결과가 없습니다.")
+        else:
+            print(f"\n📚 {len(results)}개 결과:")
+            for i, r in enumerate(results, 1):
+                print(f"\n{i}. [유사도: {r['similarity']:.2f}]")
+                print(f"   {r['text'][:200]}...")
+                print(f"   출처: {r['metadata'].get('source', 'unknown')}")
+        
+        continue
+    
+    # ========== END NEW ==========
+    
+    # 일반 대화
+    else:
+        response = conversation_manager.chat(user_input)
+        print(f"\nAI: {response}")
+
+
+3. 시작 메시지 수정
+
+프로그램 시작 시 안내 메시지에 새 명령어 추가:
+
+print("""
+사용 가능한 명령어:
+- exit, quit, 종료: 프로그램 종료
+- history, 대화기록: 대화 기록 보기
+- clear, 초기화: 대화 기록 초기화
+- save, 저장: 대화 기록 저장
+- memory, 메모리: 메모리 통계 보기 (NEW)
+- memory-search <검색어>: 메모리 직접 검색 (NEW)
+""")
+
+
+[테스트 시나리오]
+
+1. 프로그램 실행
+   python main.py
+
+2. 메모리 통계 확인
+   당신: memory
+
+3. 검색 수행 (메모리에 자동 저장됨)
+   당신: 테슬라 최신 뉴스 알려줘
+
+4. 메모리 검색
+   당신: memory-search 테슬라
+
+5. 다시 통계 확인 (문서 수 증가 확인)
+   당신: memory
