@@ -1,0 +1,22 @@
+src/task_planner.py의 TaskPlanner 클래스에서
+헬퍼 메서드들을 구현해주세요.
+
+[구현할 메서드]
+
+def _get_task_by_id(self, task_id: str) -> Optional[Subtask]:
+    """ID로 태스크 찾기"""
+    for task in self.tasks:
+        if task.id == task_id:
+            return task
+    return None
+
+def _dependencies_met(self, task: Subtask) -> bool:
+    """태스크의 의존성이 모두 충족되었는지 확인"""
+    for dep_id in task.dependencies:
+        dep_task = self._get_task_by_id(dep_id)
+        if not dep_task:
+            logger.warning(f"Dependency {dep_id} not found for {task.id}")
+            return False
+        if dep_task.status != TaskStatus.COMPLETED:
+            return False
+    return True

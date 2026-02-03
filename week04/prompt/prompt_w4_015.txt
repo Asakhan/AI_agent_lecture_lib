@@ -1,0 +1,54 @@
+main.py를 수정하여 자율 실행 모드를 추가해주세요.
+
+[수정 사항]
+
+1. Import 추가
+from src.orchestrator import AutonomousOrchestrator
+
+2. Orchestrator 초기화 (main 함수 내)
+print("Initializing Autonomous Orchestrator...")
+orchestrator = AutonomousOrchestrator(
+    client=OpenAI(),
+    memory_manager=memory_manager,
+    search_agent=search_agent
+)
+print("✓ Autonomous Orchestrator Ready")
+
+3. 새 명령어 추가 (while 루프 내)
+
+elif user_input.lower().startswith('auto '):
+    goal = user_input[5:].strip()
+    
+    if not goal:
+        print("사용법: auto <목표>")
+        print("예시: auto AI 반도체 시장 동향 분석")
+        continue
+    
+    print(f"\n🚀 자율 실행 모드 시작")
+    print(f"목표: {goal}")
+    print("-" * 50)
+    
+    try:
+        result = orchestrator.execute(goal, verbose=True)
+        print("\n" + "=" * 50)
+        print("📋 최종 리포트")
+        print("=" * 50)
+        print(result)
+    except Exception as e:
+        print(f"❌ 자율 실행 오류: {e}")
+    
+    continue
+
+elif user_input.lower() in ['auto-stats', '자율통계']:
+    stats = orchestrator.get_stats()
+    print("\n📊 자율 실행 통계")
+    print(f"  총 실행 횟수: {stats['total_executions']}")
+    if stats['quality_stats']:
+        qs = stats['quality_stats']
+        print(f"  평균 품질 점수: {qs.get('average_score', 0):.1f}/10")
+        print(f"  품질 통과율: {qs.get('pass_rate', 0)*100:.1f}%")
+    continue
+
+4. 도움말 업데이트
+print("  auto <목표> - 🆕 자율 실행 모드")
+print("  auto-stats - 🆕 자율 실행 통계")

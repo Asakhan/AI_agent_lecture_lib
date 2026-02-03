@@ -1,0 +1,52 @@
+src/task_planner.py에 TaskPlanner 클래스의 기본 구조를 추가해주세요.
+
+[추가 위치]
+Subtask 클래스 아래에 추가
+
+[구현 내용]
+
+class TaskPlanner:
+    """LLM을 활용한 작업 분해 플래너"""
+    
+    def __init__(self, client: OpenAI):
+        """
+        Args:
+            client: OpenAI 클라이언트
+        """
+        self.client = client
+        self.tasks: List[Subtask] = []
+        self.original_goal: str = ""
+        logger.info("TaskPlanner initialized")
+    
+    def decompose(self, goal: str) -> List[Subtask]:
+        """목표를 서브태스크로 분해"""
+        pass
+    
+    def get_next_task(self) -> Optional[Subtask]:
+        """실행 가능한 다음 태스크 반환"""
+        pass
+    
+    def update_status(self, task_id: str, status: TaskStatus, result: Optional[str] = None) -> bool:
+        """태스크 상태 업데이트"""
+        pass
+    
+    def is_complete(self) -> bool:
+        """모든 태스크 완료 여부 확인"""
+        pass
+    
+    def _dependencies_met(self, task: Subtask) -> bool:
+        """의존성 충족 여부 확인"""
+        pass
+    
+    def _get_task_by_id(self, task_id: str) -> Optional[Subtask]:
+        """ID로 태스크 찾기"""
+        pass
+    
+    def visualize(self) -> None:
+        """현재 태스크 상태 시각화"""
+        pass
+
+[확인 사항]
+- 클래스 기본 구조만 생성 (메서드 내용은 pass)
+- docstring 포함
+- 타입 힌트 포함

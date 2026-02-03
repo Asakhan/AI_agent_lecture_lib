@@ -1,0 +1,59 @@
+src/task_planner.py의 TaskPlanner 클래스에서
+is_complete()와 visualize() 메서드를 구현해주세요.
+
+[구현 내용]
+
+def is_complete(self) -> bool:
+    """모든 태스크 완료 여부 확인"""
+    if not self.tasks:
+        return True
+    
+    for task in self.tasks:
+        if task.status not in [TaskStatus.COMPLETED, TaskStatus.SKIPPED]:
+            return False
+    return True
+
+def visualize(self) -> None:
+    """현재 태스크 상태를 시각적으로 출력"""
+    status_icons = {
+        TaskStatus.PENDING: "⏳",
+        TaskStatus.IN_PROGRESS: "🔄",
+        TaskStatus.COMPLETED: "✅",
+        TaskStatus.FAILED: "❌",
+        TaskStatus.SKIPPED: "⏭️"
+    }
+    
+    print("\n" + "="*60)
+    print(f"📋 Task Plan: {self.original_goal[:50]}...")
+    print("="*60)
+    
+    for task in self.tasks:
+        icon = status_icons.get(task.status, "❓")
+        deps_str = f" (depends: {', '.join(task.dependencies)})" if task.dependencies else ""
+        
+        print(f"\n{icon} [{task.id}] {task.description}")
+        print(f"   Priority: {task.priority} | Status: {task.status.value}{deps_str}")
+        
+        if task.result:
+            result_preview = task.result[:100] + "..." if len(task.result) > 100 else task.result
+            print(f"   Result: {result_preview}")
+    
+    completed = sum(1 for t in self.tasks if t.status == TaskStatus.COMPLETED)
+    total = len(self.tasks)
+    progress = (completed / total * 100) if total > 0 else 0
+    
+    print("\n" + "-"*60)
+    print(f"📊 Progress: {completed}/{total} ({progress:.1f}%)")
+    print("="*60 + "\n")
+
+def get_summary(self) -> Dict[str, Any]:
+    """현재 상태 요약 반환"""
+    return {
+        "goal": self.original_goal,
+        "total_tasks": len(self.tasks),
+        "completed": sum(1 for t in self.tasks if t.status == TaskStatus.COMPLETED),
+        "failed": sum(1 for t in self.tasks if t.status == TaskStatus.FAILED),
+        "pending": sum(1 for t in self.tasks if t.status == TaskStatus.PENDING),
+        "in_progress": sum(1 for t in self.tasks if t.status == TaskStatus.IN_PROGRESS),
+        "is_complete": self.is_complete()
+    }

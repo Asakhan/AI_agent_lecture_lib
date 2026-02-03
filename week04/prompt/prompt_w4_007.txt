@@ -1,0 +1,50 @@
+src/task_planner.py의 TaskPlanner 클래스에서
+get_next_task()와 update_status() 메서드를 구현해주세요.
+
+[구현 내용]
+
+def get_next_task(self) -> Optional[Subtask]:
+    """실행 가능한 다음 태스크 반환"""
+    executable = [
+        task for task in self.tasks
+        if task.status == TaskStatus.PENDING
+        and self._dependencies_met(task)
+        and task.attempts < task.max_attempts
+    ]
+    
+    if not executable:
+        # 재시도 가능한 실패 태스크 확인
+        retryable = [
+            task for task in self.tasks
+            if task.status == TaskStatus.FAILED
+            and task.attempts < task.max_attempts
+            and self._dependencies_met(task)
+        ]
+        if retryable:
+            task = sorted(retryable, key=lambda t: t.priority)[0]
+            task.status = TaskStatus.PENDING
+            return task
+        return None
+    
+    next_task = sorted(executable, key=lambda t: t.priority)[0]
+    next_task.status = TaskStatus.IN_PROGRESS
+    next_task.attempts += 1
+    
+    logger.info(f"Next task: {next_task.id} (attempt {next_task.attempts})")
+    return next_task
+
+def update_status(self, task_id: str, status: TaskStatus, result: Optional[str] = None) -> bool:
+    """태스크 상태 업데이트"""
+    task = self._get_task_by_id(task_id)
+    if not task:
+        logger.error(f"Task not found: {task_id}")
+        return False
+    
+    old_status = task.status
+    task.status = status
+    
+    if result is not None:
+        task.result = result
+    
+    logger.info(f"Task {task_id}: {old_status.value} → {status.value}")
+    return True

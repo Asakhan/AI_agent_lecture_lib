@@ -1,0 +1,15 @@
+현재 프로젝트 구조를 확인하고 4주차 작업을 위한 준비를 해주세요.
+
+[확인 사항]
+1. src/ 폴더에 기존 파일들이 있는지 확인
+   - conversation_manager.py (Week 1)
+   - search_agent.py (Week 2)  
+   - memory_manager.py (Week 3)
+
+2. config/prompts.py 파일 구조 확인
+
+3. 필요시 tests/ 폴더 생성
+
+[출력]
+- 현재 프로젝트 구조
+- 4주차에 추가될 파일 목록 확인
