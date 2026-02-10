@@ -1,0 +1,39 @@
+src/agents/quality_critic.py에 QualityCritic 클래스를 구현해주세요.
+
+QualityCritic은 BaseAgent를 상속하며, 기존 QualityManager(src/quality_manager.py)와는 별도로 리포트 전용 5항목 평가를 수행합니다.
+
+⚠️ 기존 QualityManager(3항목: completeness, accuracy, relevance)는 수정하지 않습니다.
+QualityCritic은 리포트 품질에 특화된 새로운 5항목 평가 에이전트입니다.
+
+클래스 요구사항:
+- BaseAgent를 상속
+- PASS_THRESHOLD = 7.0 (클래스 변수)
+- __init__(self, client: OpenAI)
+  - super().__init__()으로 name="Critic", role="품질 검증 전문가", system_prompt=CRITIC_AGENT_PROMPT 전달
+
+- execute(self, input_data: Dict) -> Dict
+  - input_data에서 "topic", "report" 키를 받음
+  - _evaluate_report(topic, report) 호출
+  - 반환:
+    {
+      "scores": {
+        "completeness": float,   # 완성도
+        "accuracy": float,       # 정확성
+        "clarity": float,        # 명확성
+        "structure": float,      # 구조
+        "source_quality": float  # 출처 품질
+      },
+      "overall_score": float,    # 5개 평균
+      "feedback": str,           # 개선 피드백
+      "pass": bool               # overall_score >= PASS_THRESHOLD
+    }
+
+- _evaluate_report(self, topic: str, report: str) -> Dict
+  - _call_llm_json()으로 CRITIC_AGENT_PROMPT 활용
+  - 5개 항목 각각 1-10점으로 평가 요청
+  - overall이 없으면 5개 평균으로 계산
+  - 실패 시 기본값 반환 (all 5.0, pass=False)
+
+주의사항:
+- 기존 QualityManager(src/quality_manager.py)는 절대 수정하지 마세요
+- QualityCritic은 src/agents/ 디렉토리에 새로 만드는 별도 클래스입니다

@@ -1,0 +1,37 @@
+src/agents/research_agent.py에 ResearchAgent 클래스를 구현해주세요.
+
+ResearchAgent는 BaseAgent를 상속하며, 기존 SearchAgent(src/search_agent.py)와 MemoryManager(src/memory_manager.py)를 활용하여 정보를 수집합니다.
+
+클래스 요구사항:
+- BaseAgent를 상속
+- __init__(self, client: OpenAI, search_agent: SearchAgent, memory_manager: MemoryManager)
+  - super().__init__()으로 name="Researcher", role="정보 수집 전문가", system_prompt=RESEARCH_AGENT_PROMPT 전달
+  - self.search_agent = search_agent
+  - self.memory_manager = memory_manager
+
+- execute(self, input_data: Dict) -> Dict
+  - input_data에서 "topic" 키로 주제를 받음
+  - 1단계: _generate_search_queries(topic) → 3-5개 검색 쿼리 생성 (LLM 사용)
+  - 2단계: _search_memory(topic) → 메모리에서 기존 지식 검색
+  - 3단계: _execute_searches(queries) → 각 쿼리로 웹 검색 실행
+  - 반환: {"topic": str, "memory_data": list, "search_data": list, "source_count": int, "queries_used": list}
+
+- _generate_search_queries(self, topic: str) -> List[str]
+  - _call_llm_json()으로 RESEARCH_AGENT_PROMPT 활용하여 쿼리 생성
+  - 반환: ["query1", "query2", ...] (3-5개)
+  - 실패 시 [topic] 반환 (최소 1개 보장)
+
+- _search_memory(self, topic: str) -> List[Dict]
+  - self.memory_manager.search_memory(topic, top_k=3) 호출
+  - 에러 발생 시 빈 리스트 반환
+
+- _execute_searches(self, queries: List[str]) -> List[Dict]
+  - 각 query에 대해 self.search_agent.search(query) 호출
+  - 결과를 self.search_agent.format_for_llm(result)로 변환하여 수집
+  - 각 검색 결과를 {"query": query, "result": formatted_result} 형태로 저장
+  - 실패한 검색은 건너뛰기 (로그 남기기)
+
+주의사항:
+- 기존 SearchAgent의 search() 메서드와 format_for_llm() 메서드를 그대로 활용합니다
+- 기존 MemoryManager의 search_memory() 메서드를 그대로 활용합니다
+- 새로운 API를 만들지 말고, 기존 인터페이스를 재사용합니다

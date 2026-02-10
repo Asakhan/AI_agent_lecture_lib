@@ -1,0 +1,61 @@
+src/research_coordinator.py에 ResearchCoordinator 클래스를 구현해주세요.
+
+ResearchCoordinator는 4개의 전문 에이전트(ResearchAgent, AnalysisAgent, ReportWriter, QualityCritic)를 순차적으로 조율하여 주제를 받아 최종 리포트를 생성합니다.
+
+기존 AutonomousOrchestrator(src/orchestrator.py)를 참고하되, 수정하지 마세요. ResearchCoordinator는 별도의 새 파일입니다.
+
+클래스 요구사항:
+- __init__(self, client: OpenAI, search_agent: SearchAgent, memory_manager: MemoryManager)
+  - 4개 에이전트 인스턴스 생성:
+    - self.researcher = ResearchAgent(client, search_agent, memory_manager)
+    - self.analyzer = AnalysisAgent(client)
+    - self.writer = ReportWriter(client)
+    - self.critic = QualityCritic(client)
+  - self.max_revision_rounds = 2 (최대 수정 반복 횟수)
+  - self.logger 설정
+
+- run(self, topic: str, verbose: bool = True) -> Dict
+  - 전체 실행 흐름:
+
+  Phase 1: 연구 (Research)
+    - verbose면 "🔍 [Phase 1/4] Researcher: 정보 수집 중..." 출력
+    - research_data = self.researcher.execute({"topic": topic})
+    - verbose면 수집 결과 요약 출력 (쿼리 개수, 검색 결과 건수)
+
+  Phase 2: 분석 (Analysis)
+    - verbose면 "📊 [Phase 2/4] Analyzer: 데이터 분석 중..." 출력
+    - analysis = self.analyzer.execute(research_data)
+    - verbose면 분석 결과 요약 출력 (클러스터 수, 인사이트 수)
+
+  Phase 3: 작성 + 검증 루프 (Write + Review)
+    - 최대 max_revision_rounds + 1 회 반복
+    - verbose면 "✍️ [Phase 3/4] Writer: 리포트 작성 중..." 출력
+    - draft = self.writer.execute({"topic": topic, "analysis": analysis, "feedback": feedback or None})
+    - verbose면 "🔎 [Phase 3/4] Critic: 품질 검증 중..." 출력
+    - review = self.critic.execute({"topic": topic, "report": draft["report"]})
+    - verbose면 각 점수와 종합 점수 출력
+    - review["pass"]가 True면 루프 종료
+    - False면 feedback = review["feedback"]로 다음 루프에 전달
+
+  반환:
+    {
+      "topic": topic,
+      "report": draft["report"],           # 최종 리포트 (Markdown)
+      "score": review["overall_score"],     # 최종 품질 점수
+      "scores": review["scores"],           # 상세 점수
+      "revision_count": round_num,          # 수정 횟수
+      "research_summary": {                 # 연구 요약
+        "queries_used": research_data["queries_used"],
+        "source_count": research_data["source_count"],
+        "insights_count": len(analysis.get("insights", []))
+      }
+    }
+
+- get_agents_info(self) -> List[Dict]
+  - 각 에이전트의 name, role 정보를 리스트로 반환
+  - UI 표시용
+
+주의사항:
+- 기존 orchestrator.py는 수정하지 마세요
+- 에러 발생 시 각 Phase에서 try/except로 잡아서 로깅 후 부분 결과라도 반환합니다
+- verbose 출력은 main.py에서 사용자에게 진행 상황을 보여주는 용도입니다

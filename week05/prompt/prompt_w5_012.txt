@@ -1,0 +1,52 @@
+tests/test_week5_part3.py에 5주차 전체 시스템 통합 테스트를 작성해주세요.
+
+이 테스트는 전체 파이프라인이 올바르게 연결되었는지 검증합니다.
+
+테스트 항목 (총 6개):
+
+1. test_full_pipeline_structure()
+   - ResearchCoordinator를 Mock 의존성으로 생성
+   - coordinator.researcher, coordinator.analyzer, coordinator.writer, coordinator.critic이 모두 존재하는지 확인
+   - 각각 올바른 클래스 인스턴스인지 확인 (isinstance)
+
+2. test_report_formatter_integration()
+   - 실제 Markdown 텍스트로 ReportFormatter 메서드들을 순차적으로 호출
+   - to_markdown() → to_html() → save_report() 체이닝 테스트
+   - 최종 파일이 올바르게 생성되는지 확인
+
+3. test_agent_execute_interface()
+   - 각 에이전트의 execute()가 올바른 키를 가진 Dict를 반환하는지 확인
+   - Mock된 _call_llm, _call_llm_json을 사용
+   - ResearchAgent.execute() → "topic", "search_data", "source_count" 키 확인
+   - AnalysisAgent.execute() → "clusters", "insights", "trends" 키 확인
+   - ReportWriter.execute() → "report", "word_count" 키 확인
+   - QualityCritic.execute() → "scores", "overall_score", "pass" 키 확인
+
+4. test_coordinator_run_with_mocked_agents()
+   - ResearchCoordinator의 run() 메서드를 테스트
+   - 4개 에이전트의 execute()를 모두 Mock으로 대체하여 정해진 결과를 반환하게 설정
+   - run()이 올바른 결과 Dict를 반환하는지 확인
+   - "report", "score", "revision_count" 키 확인
+
+5. test_main_imports()
+   - main.py에서 필요한 모든 import가 정상 동작하는지 확인
+   - ResearchCoordinator, ReportFormatter import 확인
+
+6. test_existing_features_intact()
+   - 기존 4주차 클래스들이 여전히 정상 import되는지 확인
+   - AutonomousOrchestrator, TaskPlanner, ReActEngine, QualityManager, LoopPrevention
+   - 기존 기능이 5주차 변경으로 깨지지 않았는지 검증
+
+테스트 실행 방법:
+```bash
+# Part 3 테스트만
+pytest tests/test_week5_part3.py -v
+
+# 5주차 전체 테스트
+pytest tests/test_week5_part1.py tests/test_week5_part2.py tests/test_week5_part3.py -v
+```
+
+주의사항:
+- 실제 API 호출은 하지 않습니다 (모든 OpenAI 호출은 Mock)
+- 기존 4주차 테스트도 여전히 통과해야 합니다
+- Mock 설정 시 side_effect가 아닌 return_value를 사용하여 안정적으로 동작하게 합니다

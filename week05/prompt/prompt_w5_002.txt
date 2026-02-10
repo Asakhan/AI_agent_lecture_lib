@@ -1,0 +1,35 @@
+src/agents/ 디렉토리를 생성하고, BaseAgent 추상 클래스를 구현해주세요.
+
+1. src/agents/__init__.py 생성
+   - BaseAgent, ResearchAgent, AnalysisAgent, ReportWriter, QualityCritic을 임포트
+   - __all__ 리스트 정의
+   - (아직 존재하지 않는 클래스는 주석 처리해두고, 구현 후 주석 해제)
+
+2. src/agents/base_agent.py 생성
+
+BaseAgent 클래스 요구사항:
+- ABC를 상속받는 추상 클래스
+- __init__(self, client: OpenAI, name: str, role: str, system_prompt: str)
+  - self.client = client (OpenAI 인스턴스)
+  - self.name = name
+  - self.role = role
+  - self.system_prompt = system_prompt
+  - self.logger = logging.getLogger(f"Agent:{name}")
+- @abstractmethod execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]
+  - 각 에이전트가 반드시 구현해야 하는 핵심 로직
+- _call_llm(self, user_message: str, temperature: float = 0.7) -> str
+  - OpenAI API 호출 공통 메서드
+  - model은 config.settings.DEFAULT_MODEL 사용
+  - messages: system_prompt + user_message
+  - 에러 발생 시 로깅 후 빈 문자열 반환
+- _call_llm_json(self, user_message: str, temperature: float = 0.3) -> Dict
+  - JSON 응답 전용 LLM 호출
+  - response_format={"type": "json_object"} 사용
+  - JSON 파싱 실패 시 빈 dict 반환
+- __repr__(self) -> str
+  - f"<{self.name} ({self.role})>" 형식
+
+기존 프로젝트의 코딩 스타일을 따라주세요:
+- 타입 힌트 사용
+- docstring 포함
+- logging 사용

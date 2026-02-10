@@ -1,0 +1,28 @@
+src/agents/analysis_agent.py에 AnalysisAgent 클래스를 구현해주세요.
+
+AnalysisAgent는 BaseAgent를 상속하며, 수집된 데이터를 분석하여 인사이트를 도출합니다.
+
+클래스 요구사항:
+- BaseAgent를 상속
+- __init__(self, client: OpenAI)
+  - super().__init__()으로 name="Analyzer", role="데이터 분석 전문가", system_prompt=ANALYSIS_AGENT_PROMPT 전달
+
+- execute(self, input_data: Dict) -> Dict
+  - input_data에서 "topic", "search_data", "memory_data"(optional) 키를 받음
+  - 1단계: 검색 데이터를 하나의 텍스트로 통합 (_prepare_data)
+  - 2단계: _analyze(topic, combined_data) → LLM으로 분석 수행
+  - 반환: {"topic": str, "clusters": list, "insights": list, "trends": list, "raw_data": 원본 search_data}
+
+- _prepare_data(self, search_data: List[Dict], memory_data: List[Dict]) -> str
+  - search_data와 memory_data를 하나의 분석용 텍스트로 통합
+  - 각 데이터 항목을 번호 매기기하여 정리
+  - "=== 웹 검색 결과 ===" 와 "=== 기존 지식 ===" 섹션으로 구분
+
+- _analyze(self, topic: str, data: str) -> Dict
+  - _call_llm_json()으로 분석 수행
+  - 프롬프트에 topic과 data를 전달하여 clusters, insights, trends를 JSON으로 반환 요청
+  - 실패 시 기본값 반환: {"clusters": [], "insights": ["분석 실패"], "trends": []}
+
+주의사항:
+- AnalysisAgent는 외부 도구(검색, DB)를 사용하지 않고, 순수 LLM 분석만 수행합니다
+- 입력 데이터가 너무 길 경우를 대비해 _prepare_data에서 각 항목을 500자로 truncate합니다

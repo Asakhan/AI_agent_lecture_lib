@@ -1,0 +1,55 @@
+src/report_formatter.py에 ReportFormatter 클래스를 구현해주세요.
+
+ReportFormatter는 리포트를 Markdown, HTML 형식으로 변환하고 파일로 저장하는 유틸리티 클래스입니다. 모든 메서드는 @staticmethod입니다.
+
+클래스 요구사항:
+- 모든 메서드가 @staticmethod
+
+- to_markdown(report: str, metadata: Dict) -> str
+  - 리포트 앞에 YAML front matter 메타데이터 추가
+  - 메타데이터: title, date(현재 시각), agent_score, source_count, revision_count
+  - 예시:
+    ---
+    title: AI 반도체 시장 분석
+    date: 2025-02-09
+    agent_score: 7.8/10
+    sources: 12
+    revisions: 1
+    ---
+    (이후 report 원문)
+
+- to_html(report: str, metadata: Dict) -> str
+  - markdown 라이브러리를 사용하여 Markdown → HTML 변환
+  - 완성된 HTML 문서 (<!DOCTYPE html>부터 </html>까지)
+  - 스타일: Noto Sans KR 폰트, max-width: 800px, 깔끔한 CSS
+  - 메타데이터를 페이지 상단에 표시 (생성일, 품질점수, 참고자료 수)
+  - markdown 라이브러리가 없으면 간단한 HTML 태그로 대체
+
+- save_report(report: str, metadata: Dict, output_dir: str = "data/reports") -> Dict
+  - output_dir 디렉토리 생성 (exist_ok=True)
+  - 파일명: {safe_topic}_{timestamp}.md / .html
+    - safe_topic: 공백 → _, 특수문자 제거, 30자 제한
+    - timestamp: %Y%m%d_%H%M%S 형식
+  - Markdown 파일 저장
+  - HTML 파일 저장
+  - 반환:
+    {
+      "files": [
+        {"format": "markdown", "path": "data/reports/xxx.md"},
+        {"format": "html", "path": "data/reports/xxx.html"}
+      ],
+      "preview": report[:500] + "...",
+      "word_count": len(report.split())
+    }
+
+- print_report_summary(result: Dict, score: float) -> None
+  - 터미널에 리포트 생성 결과를 예쁘게 출력
+  - 포함: 품질 점수, 분량, 저장된 파일 경로
+
+requirements.txt에 markdown 패키지를 추가해주세요:
+  markdown>=3.5.0
+
+주의사항:
+- 파일명의 한글은 유지합니다 (URL 인코딩 불필요)
+- encoding="utf-8"로 저장합니다
+- output_dir 경로가 존재하지 않아도 자동 생성합니다

@@ -1,0 +1,30 @@
+src/agents/report_writer.py에 ReportWriter 클래스를 구현해주세요.
+
+ReportWriter는 BaseAgent를 상속하며, 분석 결과를 바탕으로 구조화된 리포트를 작성합니다.
+
+클래스 요구사항:
+- BaseAgent를 상속
+- __init__(self, client: OpenAI)
+  - super().__init__()으로 name="Writer", role="리포트 작성 전문가", system_prompt=REPORT_WRITER_PROMPT 전달
+
+- execute(self, input_data: Dict) -> Dict
+  - input_data에서 "topic", "analysis" (AnalysisAgent 출력), "feedback" (optional, QualityCritic 피드백) 키를 받음
+  - feedback이 있으면: _revise_report(topic, analysis, previous_report, feedback)
+  - feedback이 없으면: _write_initial_report(topic, analysis)
+  - 반환: {"topic": str, "report": str(Markdown), "word_count": int, "has_revision": bool}
+
+- _write_initial_report(self, topic: str, analysis: Dict) -> str
+  - _call_llm()으로 REPORT_WRITER_PROMPT 활용
+  - 프롬프트에 topic, analysis["clusters"], analysis["insights"], analysis["trends"]를 전달
+  - Markdown 형식의 리포트 반환
+  - temperature=0.7 사용
+
+- _revise_report(self, topic: str, analysis: Dict, previous_report: str, feedback: str) -> str
+  - _call_llm()으로 수정 요청
+  - 프롬프트에 이전 리포트 + 피드백을 포함하여 개선된 버전 요청
+  - temperature=0.7 사용
+
+주의사항:
+- 리포트는 반드시 Markdown 형식으로 작성되어야 합니다
+- execute() 결과의 "report" 키에 전체 Markdown 텍스트가 들어갑니다
+- word_count는 report.split() 길이로 계산합니다

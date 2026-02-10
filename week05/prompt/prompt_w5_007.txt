@@ -1,0 +1,49 @@
+tests/test_week5_part1.py에 Part 1의 단위 테스트를 작성해주세요.
+
+테스트는 실제 API 호출 없이 클래스 구조와 인터페이스를 검증합니다.
+
+테스트 항목 (총 8개):
+
+1. test_base_agent_is_abstract()
+   - BaseAgent를 직접 인스턴스화하면 TypeError가 발생하는지 확인
+
+2. test_base_agent_subclass_interface()
+   - BaseAgent를 상속한 임시 클래스(DummyAgent)를 만들어서 execute()를 구현하면 정상 생성되는지 확인
+   - name, role, system_prompt 속성이 올바르게 설정되는지 확인
+
+3. test_research_agent_creation()
+   - ResearchAgent가 올바르게 생성되는지 확인
+   - name이 "Researcher"인지 확인
+   - search_agent, memory_manager 속성이 설정되는지 확인
+   - Mock 객체로 OpenAI, SearchAgent, MemoryManager를 대체
+
+4. test_analysis_agent_creation()
+   - AnalysisAgent가 올바르게 생성되는지 확인
+   - name이 "Analyzer"인지 확인
+
+5. test_report_writer_creation()
+   - ReportWriter가 올바르게 생성되는지 확인
+   - name이 "Writer"인지 확인
+
+6. test_quality_critic_creation()
+   - QualityCritic이 올바르게 생성되는지 확인
+   - name이 "Critic"인지 확인
+   - PASS_THRESHOLD가 7.0인지 확인
+
+7. test_prompts_exist()
+   - config.prompts에 RESEARCH_AGENT_PROMPT, ANALYSIS_AGENT_PROMPT, REPORT_WRITER_PROMPT, CRITIC_AGENT_PROMPT, COORDINATOR_PROMPT가 존재하는지 확인
+   - 각 프롬프트가 빈 문자열이 아닌지 확인
+
+8. test_agents_package_imports()
+   - from src.agents import BaseAgent, ResearchAgent, AnalysisAgent, ReportWriter, QualityCritic이 정상 동작하는지 확인
+
+테스트 실행 방법:
+```bash
+pytest tests/test_week5_part1.py -v
+```
+
+주의사항:
+- OpenAI 클라이언트는 unittest.mock.MagicMock으로 대체합니다
+- SearchAgent, MemoryManager도 Mock으로 대체합니다
+- 실제 API 호출은 하지 않습니다
+- 기존 테스트 파일의 스타일(pytest, 한글 설명)을 따릅니다
