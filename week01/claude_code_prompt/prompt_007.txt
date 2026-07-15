@@ -1,0 +1,14 @@
+ConversationManager 클래스를 개선해주세요.
+수정 전 conversation_manager.py와 config/prompts.py, main.py를 읽어주세요.
+
+[변경사항]
+1. config.prompts에서 RESEARCH_ASSISTANT_SYSTEM_MESSAGE 임포트
+2. __init__ 메서드 수정:
+   - system_message 파라미터 기본값을 RESEARCH_ASSISTANT_SYSTEM_MESSAGE로 설정
+   - 기존 코드와의 호환성 유지
+3. main.py 수정:
+   - System Message를 명시적으로 전달하지 않고 기본값 사용
+
+변경 이력을 주석으로 남겨주세요.
+수정 후 `python -c "from src.conversation_manager import ConversationManager"`로
+임포트 체인이 깨지지 않았는지 확인해주세요.

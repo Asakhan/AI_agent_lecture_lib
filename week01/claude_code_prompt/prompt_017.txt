@@ -1,0 +1,15 @@
+tests/ 폴더에 기본적인 테스트를 작성하고 실제로 실행해주세요.
+
+[테스트 파일: tests/test_conversation_manager.py]
+1. ConversationManager 초기화 테스트
+2. System Message 설정 테스트
+3. 메시지 추가 테스트
+4. 상태 판단(determine_state) 테스트
+
+pytest 사용을 권장합니다.
+API 호출이 필요한 부분은 mock 처리하거나 테스트에서 제외해,
+API 키 없이도 통과하도록 작성해주세요.
+
+작성 후 `pip install pytest`가 필요하면 설치하고,
+`pytest tests/ -v`를 실제로 실행하여 모든 테스트가
+통과하는 결과를 보여주세요. 실패가 있으면 원인을 고쳐주세요.
