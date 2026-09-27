@@ -1,0 +1,22 @@
+현재 프로젝트 구조를 확인하고 4주차 작업을 위한 준비를 해주세요.
+먼저 현재 작업 디렉토리가 ai-research-assistant/ 프로젝트 루트인지 확인해주세요.
+(이후 모든 작업은 이 프로젝트 폴더 안에서 진행합니다.)
+
+[확인 사항]
+1. src/ 폴더에 기존 파일들이 있는지 확인
+   - conversation_manager.py (Week 1)
+   - search_agent.py (Week 2)
+   - memory_manager.py (Week 3)
+
+2. config/prompts.py 파일 구조 확인
+
+3. 필요시 tests/ 폴더 생성
+
+[출력]
+- 현재 프로젝트 구조
+- 4주차에 추가될 파일 목록 확인
+
+확인은 `find src config tests -maxdepth 1 -type f` 또는 `tree src config tests`로 실제 파일 존재 여부를 출력해서 진행해주세요.
+tests/ 폴더가 없다면 생성하고, 빈 tests/__init__.py도 함께 만들어주세요.
+그리고 CLAUDE.md에 이번 주차가 "4주차 - 자율 실행 에이전트(작업 분해·ReAct·품질 관리) 구축"임을
+기록하고, 진행 상황을 이어서 업데이트할 수 있도록 준비해주세요.

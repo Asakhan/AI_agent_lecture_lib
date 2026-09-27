@@ -1,0 +1,15 @@
+src/tools/ 폴더를 생성하고 빈 __init__.py 파일을 만들어주세요.
+생성 전에 현재 src/ 폴더 구조를 먼저 확인해주세요.
+
+[생성할 구조]
+src/
+└── tools/
+    └── __init__.py
+
+[__init__.py 내용]
+- 모듈 설명 docstring만 포함
+- "도구(Tools) 모듈 패키지" 설명
+- 실제 import/export는 나중에 추가할 예정이라는 TODO 주석
+
+생성 후 `find src/tools` 또는 `tree src/tools`로 구조가 만들어졌는지 확인하고,
+`python -c "import src.tools"`로 패키지가 정상 인식되는지 검증해주세요.

@@ -1,0 +1,76 @@
+search_with_memory() 메서드를 완성해주세요.
+편집 전에 src/search_agent.py의 search_with_memory 앞부분을 먼저 읽어
+이어서 작성할 위치를 확인하세요.
+
+[구현 로직 - Part 2: 웹 검색 및 저장]
+
+    # ... (이전 코드 계속)
+
+    # [2단계] 웹 검색 필요성 판단
+    need_web_search = len(memory_results) < memory_threshold
+
+    if need_web_search:
+        logger.info("Memory results insufficient, performing web search")
+
+        try:
+            # 웹 검색 수행 (기존 tavily_search 함수 사용)
+            from src.tools.web_search import tavily_search
+
+            web_response = tavily_search(query, max_results=max_results)
+            web_results = web_response.get("results", [])
+            results["web_results"] = web_results
+
+            logger.info(f"Found {len(web_results)} results from web")
+
+            # [3단계] 웹 결과를 메모리에 저장
+            if save_to_memory and self.memory_manager:
+                self._save_to_memory(web_results, query)
+
+        except Exception as e:
+            logger.error(f"Web search failed: {e}")
+            web_results = []
+    else:
+        logger.info("Sufficient results in memory, skipping web search")
+        web_results = []
+
+    # [4단계] 결과 병합
+    results["merged_results"] = self._merge_results(
+        memory_results,
+        web_results
+    )
+
+    # [5단계] 통계 업데이트
+    results["source_summary"] = {
+        "from_memory": len(memory_results),
+        "from_web": len(web_results),
+        "total": len(results["merged_results"])
+    }
+
+    logger.info(f"Search complete: {results['source_summary']}")
+
+    return results
+
+
+[테스트 코드 (주석)]
+# # 완전한 검색 테스트
+# result = agent.search_with_memory(
+#     query="테슬라 최신 뉴스",
+#     use_memory=True,
+#     save_to_memory=True,
+#     memory_threshold=3
+# )
+#
+# print(f"쿼리: {result['query']}")
+# print(f"메모리: {result['source_summary']['from_memory']}개")
+# print(f"웹: {result['source_summary']['from_web']}개")
+# print(f"총: {result['source_summary']['total']}개")
+#
+# # 병합된 결과 확인
+# for i, r in enumerate(result['merged_results'][:3], 1):
+#     print(f"{i}. {r['content'][:50]}... (출처: {r['source']})")
+
+여기서는 _save_to_memory / _merge_results 헬퍼 메서드를 호출하지만
+이들은 다음 프롬프트에서 구현합니다. 아직 정의되지 않아 실제 실행 시
+AttributeError가 날 수 있으니, 이번에는 실행하지 말고
+`python -c "from src.search_agent import SearchAgent"`로
+문법/import 오류가 없는지만 확인해주세요.

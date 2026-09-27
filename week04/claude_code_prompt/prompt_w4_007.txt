@@ -1,0 +1,64 @@
+src/task_planner.py의 TaskPlanner 클래스에서
+get_next_task()와 update_status() 메서드를 구현해주세요.
+수정 전에 현재 task_planner.py 내용을 읽어 pass로 둔 메서드 위치를 확인해주세요.
+
+[구현 내용]
+
+def get_next_task(self) -> Optional[Subtask]:
+    """실행 가능한 다음 태스크 반환"""
+    executable = [
+        task for task in self.tasks
+        if task.status == TaskStatus.PENDING
+        and self._dependencies_met(task)
+        and task.attempts < task.max_attempts
+    ]
+
+    if not executable:
+        # 재시도 가능한 실패 태스크 확인
+        retryable = [
+            task for task in self.tasks
+            if task.status == TaskStatus.FAILED
+            and task.attempts < task.max_attempts
+            and self._dependencies_met(task)
+        ]
+        if retryable:
+            task = sorted(retryable, key=lambda t: t.priority)[0]
+            task.status = TaskStatus.PENDING
+            return task
+        return None
+
+    next_task = sorted(executable, key=lambda t: t.priority)[0]
+    next_task.status = TaskStatus.IN_PROGRESS
+    next_task.attempts += 1
+
+    logger.info(f"Next task: {next_task.id} (attempt {next_task.attempts})")
+    return next_task
+
+def update_status(self, task_id: str, status: TaskStatus, result: Optional[str] = None) -> bool:
+    """태스크 상태 업데이트"""
+    task = self._get_task_by_id(task_id)
+    if not task:
+        logger.error(f"Task not found: {task_id}")
+        return False
+
+    old_status = task.status
+    task.status = status
+
+    if result is not None:
+        task.result = result
+
+    logger.info(f"Task {task_id}: {old_status.value} → {status.value}")
+    return True
+
+작성 후 API 키 없이 순수 로직만 검증해주세요. 태스크를 직접 주입하고
+우선순위·의존성 기반으로 다음 태스크가 올바르게 선택되는지 확인합니다.
+python - <<'PY'
+from src.task_planner import TaskPlanner, Subtask, TaskStatus
+p = TaskPlanner.__new__(TaskPlanner)
+p.tasks = [Subtask(id="task_1", description="조사", priority=1),
+           Subtask(id="task_2", description="분석", priority=2, dependencies=["task_1"])]
+nxt = p.get_next_task()
+print("다음 태스크:", nxt.id, "시도:", nxt.attempts)   # task_1, 1
+print("상태 갱신:", p.update_status("task_1", TaskStatus.COMPLETED, "결과"))  # True
+print("다음 태스크:", p.get_next_task().id)             # task_2
+PY

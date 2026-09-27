@@ -1,0 +1,77 @@
+src/conversation_manager.py 파일을 열고
+ConversationManager 클래스의 __init__ 메서드를 수정해주세요.
+
+[기존 코드 확인]
+먼저 src/conversation_manager.py를 Read하여 현재 ConversationManager의
+구조를 확인하세요.
+
+
+[수정 사항]
+
+1. __init__ 메서드에 memory_manager 파라미터 추가
+
+def __init__(
+    self,
+    search_agent: SearchAgent,
+    memory_manager: Optional[MemoryManager] = None  # NEW
+):
+    """
+    Args:
+        search_agent: 검색 에이전트
+        memory_manager: 메모리 관리자 (선택적)
+    """
+    # 기존 코드 유지
+    self.client = OpenAI()
+    self.search_agent = search_agent
+    self.conversation_history = []
+
+    # 메모리 관리자 추가 (NEW)
+    self.memory_manager = memory_manager
+
+    # 로깅
+    if self.memory_manager:
+        logger.info("ConversationManager initialized with memory")
+    else:
+        logger.info("ConversationManager initialized without memory")
+
+
+2. Import 문 추가
+
+파일 상단에 다음 추가:
+from typing import Optional, List, Dict, Any
+from src.memory_manager import MemoryManager
+
+
+[테스트 코드 (주석)]
+# from src.conversation_manager import ConversationManager
+# from src.search_agent import SearchAgent
+# from src.memory_manager import MemoryManager
+#
+# # MemoryManager 초기화
+# mm = MemoryManager("conv_memory", "data/chroma_db")
+#
+# # SearchAgent 초기화 (메모리 포함)
+# agent = SearchAgent(memory_manager=mm)
+#
+# # ConversationManager 초기화 (메모리 포함)
+# conv_mgr = ConversationManager(
+#     search_agent=agent,
+#     memory_manager=mm
+# )
+#
+# print(f"Memory enabled: {conv_mgr.memory_manager is not None}")
+
+
+[주의사항]
+- 기존 chat() 메서드는 그대로 유지
+- memory_manager는 Optional (없어도 작동)
+- 하위 호환성 유지
+
+주의: 1주차의 ConversationManager 시그니처와 달라질 수 있으니,
+기존 __init__이 어떤 인자를 받는지 반드시 먼저 Read로 확인한 뒤
+search_agent 인자와의 호환성을 맞춰주세요.
+수정 후 `python -c "from src.conversation_manager import ConversationManager"`로
+import 오류가 없는지 확인해주세요.
+인스턴스 생성은 API 키가 필요하므로 하지 말고,
+시그니처에 memory_manager 파라미터가 추가되고 import가 정상인지까지만
+확인해주세요.

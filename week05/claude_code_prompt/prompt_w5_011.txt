@@ -1,0 +1,70 @@
+main.py에 멀티 에이전트 리포트 생성 기능을 추가해주세요.
+수정 전에 main.py의 현재 print_welcome()·main()·handle_command() 구조와
+search_agent·memory_manager 변수가 어떻게 초기화되는지 먼저 읽어 확인해주세요.
+
+기존 코드의 구조를 최대한 유지하면서 다음 변경사항을 적용합니다:
+
+1. import 추가 (파일 상단)
+   - from src.research_coordinator import ResearchCoordinator
+   - from src.report_formatter import ReportFormatter
+
+2. print_welcome() 함수 수정
+   - 버전을 "v3.0"으로 변경
+   - "멀티 에이전트 리포트 생성 기능이 추가되었습니다!" 메시지 추가
+   - 명령어 목록에 추가:
+     - "report <주제>      : 🆕 멀티에이전트 리포트 생성"
+     - "report-agents      : 🆕 에이전트 정보 보기"
+
+3. main() 함수의 초기화 부분에 추가 (AutonomousOrchestrator 초기화 후)
+   - ResearchCoordinator 초기화:
+```python
+     print("Initializing Research Coordinator...")
+     coordinator = ResearchCoordinator(
+         client=OpenAI(),
+         search_agent=search_agent,
+         memory_manager=memory_manager
+     )
+     print("✓ Research Coordinator Ready (4 agents)")
+```
+
+4. 대화 루프에 report 명령어 처리 추가 (auto 명령어 처리 블록 뒤)
+
+   "report <주제>" 명령어:
+   - user_input_lower.startswith("report ") 체크
+   - goal = user_input[7:].strip()
+   - 빈 입력이면 사용법 안내
+   - 실행:
+     print(f"\n📄 멀티 에이전트 리포트 생성 시작: {topic}")
+     print("━" * 50)
+     result = coordinator.run(topic, verbose=True)
+
+     # 리포트 저장
+     save_result = ReportFormatter.save_report(
+         result["report"],
+         {"topic": topic, "score": result["score"],
+          "source_count": result["research_summary"]["source_count"],
+          "revision_count": result["revision_count"]}
+     )
+
+     # 결과 출력
+     ReportFormatter.print_report_summary(save_result, result["score"])
+
+   - 에러 발생 시: print(f"❌ 리포트 생성 오류: {e}")
+
+   "report-agents" 명령어:
+   - 에이전트 정보 출력 (coordinator.get_agents_info())
+
+   "report" 만 입력 시:
+   - 사용법 안내: "사용법: report <주제>"
+
+5. handle_command() 함수에 추가
+   - 'report' 명령어 단독 입력 시 사용법 안내 (auto와 동일한 패턴)
+
+주의사항:
+- 기존 코드 (대화, 검색, 메모리, 자율실행)는 그대로 유지합니다
+- coordinator 초기화 실패 시에도 기존 기능은 정상 동작해야 합니다
+- report 명령어와 auto 명령어는 독립적으로 동작합니다
+
+작성 후 `python -c "import main"`으로 문법·import 오류가 없는지 확인해주세요.
+main() 전체 실행은 대화형 입력과 OpenAI/Tavily API 키가 필요하므로 클로드코드에서 직접 실행하지 말고,
+사용자가 `.env`에 키를 넣은 뒤 `python main.py`로 실행하도록 안내해주세요.

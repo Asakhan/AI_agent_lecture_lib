@@ -1,0 +1,60 @@
+main.py의 handle_command() 함수에 새로운 명령어를 추가해주세요.
+수정 전에 main.py의 현재 handle_command() 함수를 먼저 읽어 기존 명령어 분기를 확인해주세요.
+
+[추가할 명령어]
+
+1. sources 명령어
+   # 🆕 출처 보기 명령어
+   if command == 'sources':
+       sources = manager.get_last_search_sources()
+       if sources:
+           print("\n📚 마지막 검색 출처:")
+           for i, source in enumerate(sources, 1):
+               print(f"  {i}. {source}")
+           print()
+       else:
+           print("\n검색 기록이 없습니다.\n")
+       return True
+
+2. status 명령어
+   # 🆕 상태 확인 명령어
+   if command == 'status':
+       print(f"\n📊 현재 상태:")
+       print(f"  • 검색 기능: {'활성화' if manager.is_search_enabled() else '비활성화'}")
+       print(f"  • 대화 횟수: {manager.get_message_count()}회")
+       print(f"  • 검색 횟수: {manager.get_search_count()}회")
+       print()
+       return True
+
+[전체 handle_command 함수 구조]
+def handle_command(command: str, manager: ConversationManager) -> bool:
+    command = command.lower().strip()
+
+    # 종료 명령어
+    if command in ['quit', 'exit', '종료']:
+        return handle_quit(manager)
+
+    # 저장 명령어
+    if command == 'save':
+        # 기존 코드...
+        return True
+
+    # 초기화 명령어
+    if command == 'clear':
+        # 기존 코드...
+        return True
+
+    # 🆕 출처 보기 명령어
+    if command == 'sources':
+        # 위 코드...
+        return True
+
+    # 🆕 상태 확인 명령어
+    if command == 'status':
+        # 위 코드...
+        return True
+
+    return False
+
+작성 후 `python -c "import main"`로 문법·import 오류가 없는지 확인해주세요.
+실제 명령어 동작은 대화 루프 실행이 필요하므로, 다음 프롬프트에서 통합 확인합니다.

@@ -1,0 +1,45 @@
+src/conversation_manager.py의 __init__ 메서드를 수정해주세요.
+수정 전에 현재 __init__ 메서드 내용을 먼저 읽어 기존 초기화 로직을 확인해주세요.
+
+[변경 사항]
+
+1. 파라미터 추가
+   def __init__(
+       self,
+       system_message: Optional[str] = None,
+       enable_search: bool = True  # 🆕 추가
+   ):
+
+2. 새로운 속성 초기화 (기존 속성 초기화 후에 추가)
+
+   # 🆕 검색 기능 설정
+   self.enable_search = enable_search
+   self.search_agent: Optional[SearchAgent] = None
+   self.tools: Optional[List[dict]] = None
+
+   if enable_search:
+       try:
+           self.search_agent = SearchAgent()
+           self.tools = AVAILABLE_TOOLS
+           logger.info("검색 기능 활성화됨")
+       except Exception as e:
+           logger.warning(f"검색 기능 초기화 실패: {e}")
+           self.enable_search = False
+
+3. System Message 기본값 변경
+   - 기존: RESEARCH_ASSISTANT_SYSTEM_MESSAGE
+   - 변경: RESEARCH_ASSISTANT_SYSTEM_MESSAGE_V2
+
+4. 로깅 메시지 업데이트
+   logger.info(
+       f"ConversationManager 초기화 완료 "
+       f"(search={'활성화' if self.enable_search else '비활성화'})"
+   )
+
+[요구사항]
+- 기존 초기화 로직 유지
+- enable_search=False일 때도 정상 동작해야 함
+- SearchAgent 초기화 실패해도 대화 기능은 동작해야 함
+
+작성 후 `python -c "from src.conversation_manager import ConversationManager"`로
+import 오류가 없는지 확인해주세요. 실제 생성 동작 검증은 다음 프롬프트에서 진행합니다.

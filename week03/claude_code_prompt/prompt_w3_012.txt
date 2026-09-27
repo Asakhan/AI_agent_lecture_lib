@@ -1,0 +1,66 @@
+src/search_agent.py 파일을 열고
+SearchAgent 클래스의 __init__ 메서드를 수정해주세요.
+
+[기존 코드 확인]
+먼저 src/search_agent.py를 Read하여 현재 SearchAgent의 구조를 확인하세요.
+
+
+[수정 사항]
+
+1. __init__ 메서드에 memory_manager 파라미터 추가
+
+def __init__(self, memory_manager: Optional[MemoryManager] = None):
+    """
+    Args:
+        memory_manager: 메모리 관리자 (선택적)
+    """
+    # 기존 코드 유지
+    self.client = OpenAI()
+    load_dotenv()
+    tavily_api_key = os.getenv("TAVILY_API_KEY")
+    self.tavily_client = TavilyClient(api_key=tavily_api_key)
+
+    # 메모리 관리자 추가 (NEW)
+    self.memory_manager = memory_manager
+
+    # 로깅
+    if self.memory_manager:
+        logger.info("SearchAgent initialized with memory")
+    else:
+        logger.info("SearchAgent initialized without memory")
+
+
+2. Import 문 추가
+
+파일 상단에 다음 추가:
+from typing import Optional, List, Dict, Any
+from src.memory_manager import MemoryManager
+from datetime import datetime
+
+
+[테스트 코드 (주석)]
+# from src.search_agent import SearchAgent
+# from src.memory_manager import MemoryManager
+#
+# # 메모리 없이 초기화
+# agent1 = SearchAgent()
+#
+# # 메모리와 함께 초기화
+# mm = MemoryManager("search_memory", "data/chroma_db")
+# agent2 = SearchAgent(memory_manager=mm)
+#
+# print(f"Agent1 메모리: {agent1.memory_manager}")  # None
+# print(f"Agent2 메모리: {agent2.memory_manager}")  # <MemoryManager object>
+
+
+[주의사항]
+- 기존 search() 메서드는 그대로 유지 (하위 호환성)
+- memory_manager는 Optional (없어도 작동)
+- 기존 코드를 최대한 건드리지 않기
+
+수정 후 `python -c "from src.search_agent import SearchAgent"`로
+import 오류가 없는지 확인해주세요.
+SearchAgent()는 __init__에서 OpenAI/Tavily 클라이언트를 초기화하므로
+실제 인스턴스 생성은 API 키가 필요합니다. 키가 없으면 인스턴스 생성은
+하지 말고, 시그니처에 memory_manager 파라미터가 추가되고 import가
+정상인지까지만 확인해주세요.

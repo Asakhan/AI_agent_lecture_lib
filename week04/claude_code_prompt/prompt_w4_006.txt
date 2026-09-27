@@ -1,0 +1,37 @@
+src/task_planner.py의 TaskPlanner 클래스에서
+헬퍼 메서드들을 구현해주세요.
+수정 전에 현재 task_planner.py 내용을 읽어 대상 메서드(_get_task_by_id, _dependencies_met)를 확인해주세요.
+
+[구현할 메서드]
+
+def _get_task_by_id(self, task_id: str) -> Optional[Subtask]:
+    """ID로 태스크 찾기"""
+    for task in self.tasks:
+        if task.id == task_id:
+            return task
+    return None
+
+def _dependencies_met(self, task: Subtask) -> bool:
+    """태스크의 의존성이 모두 충족되었는지 확인"""
+    for dep_id in task.dependencies:
+        dep_task = self._get_task_by_id(dep_id)
+        if not dep_task:
+            logger.warning(f"Dependency {dep_id} not found for {task.id}")
+            return False
+        if dep_task.status != TaskStatus.COMPLETED:
+            return False
+    return True
+
+작성 후 API 키 없이 순수 로직만 검증해주세요. 예를 들어 아래처럼
+TaskPlanner 인스턴스에 태스크를 직접 주입하고 의존성 판정을 확인합니다.
+python - <<'PY'
+from src.task_planner import TaskPlanner, Subtask, TaskStatus
+p = TaskPlanner.__new__(TaskPlanner)          # __init__(OpenAI) 우회
+p.tasks = [Subtask(id="task_1", description="a", priority=1),
+           Subtask(id="task_2", description="b", priority=2, dependencies=["task_1"])]
+t2 = p._get_task_by_id("task_2")
+print("의존성 미충족:", p._dependencies_met(t2))   # False
+p.tasks[0].status = TaskStatus.COMPLETED
+print("의존성 충족:", p._dependencies_met(t2))     # True
+PY
+(순수 파이썬 로직이므로 OpenAI API 키가 없어도 실행됩니다.)

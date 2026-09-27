@@ -1,0 +1,99 @@
+src/conversation_manager.py의 chat 메서드를 수정해주세요.
+수정 전에 현재 chat 메서드 전체를 먼저 읽어 기존 로직을 확인해주세요.
+
+[기존 chat 메서드 구조]
+def chat(self, user_input: str) -> str:
+    # 입력 검증
+    # 사용자 메시지 추가
+    # API 호출
+    # 응답 추출
+    # Assistant 메시지 추가
+    # 반환
+
+[수정할 부분]
+
+1. API 호출 부분 변경
+   기존:
+   response = self.client.chat.completions.create(
+       model=DEFAULT_MODEL,
+       messages=self.messages,
+       temperature=DEFAULT_TEMPERATURE
+   )
+
+   변경:
+   response = self._call_api_with_tools()
+
+2. 응답 처리 부분 변경
+   기존:
+   assistant_message = response.choices[0].message.content
+   self.messages.append({"role": "assistant", "content": assistant_message})
+   return assistant_message
+
+   변경:
+   message = response.choices[0].message
+
+   # 🆕 도구 호출 확인 및 처리
+   if message.tool_calls:
+       logger.info(f"도구 호출 감지: {len(message.tool_calls)}개")
+       result = self._handle_tool_calls(message)
+   else:
+       # 일반 응답
+       result = message.content
+       self.messages.append({
+           "role": "assistant",
+           "content": result
+       })
+
+   self.message_count += 1
+   self.state = "idle"
+   return result
+
+[전체 수정된 chat 메서드 구조]
+def chat(self, user_input: str) -> str:
+    # 입력 검증
+    if not user_input or not user_input.strip():
+        raise ValueError("입력이 비어있습니다.")
+
+    user_input = user_input.strip()
+    self.state = "processing"
+
+    # 사용자 메시지 추가
+    self.messages.append({
+        "role": "user",
+        "content": user_input
+    })
+
+    try:
+        # 🆕 도구 포함하여 API 호출
+        response = self._call_api_with_tools()
+        message = response.choices[0].message
+
+        # 🆕 도구 호출 확인 및 처리
+        if message.tool_calls:
+            logger.info(f"도구 호출 감지: {len(message.tool_calls)}개")
+            result = self._handle_tool_calls(message)
+        else:
+            # 일반 응답
+            result = message.content
+            self.messages.append({
+                "role": "assistant",
+                "content": result
+            })
+
+        self.message_count += 1
+        self.state = "idle"
+        return result
+
+    except Exception as e:
+        self.state = "error"
+        logger.error(f"응답 생성 실패: {str(e)}")
+        raise
+
+[요구사항]
+- 기존 예외 처리 로직 유지
+- message.tool_calls가 None이거나 빈 리스트일 때 일반 응답 처리
+- 로깅 유지/강화
+
+이 메서드는 실제 API 호출을 포함하므로 실행하지 말고,
+작성 후 `python -c "from src.conversation_manager import ConversationManager"`로
+문법·import 오류가 없는지, 그리고 빈 입력에 대해 ValueError가 나는지만 확인해주세요.
